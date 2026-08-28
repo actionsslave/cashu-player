@@ -89,7 +89,8 @@ bewusster Eingriff in NR-03 und muss gemeinsam entschieden werden.
 | FR-22 / US-07-AC-2 | Podcast mit npub, aber ohne kind:10019 öffnen | Grund „fehlende Empfangs-Konfiguration des Podcasts" | |
 | FR-25 / US-05-AC-1 | 60 s hören, Empfängerseite beobachten | Genau ein Nutzap über den Minutenbetrag; Sitzungszähler stimmt | |
 | FR-27 | Auf der Empfängerseite (Wallet mit NIP-60/61) den eingegangenen Nutzap ansehen | Betrag, `u` (Mint-URL exakt wie im kind:10019) und `p` stimmen; Proofs sind einlösbar | |
-| FR-29 / US-06-AC-4 | Alle Relays des Empfängers unerreichbar machen, Boost senden | Nach Timeout: Guthaben vollständig zurück, Verlaufseintrag „fehlgeschlagen" | |
+| FR-29 / US-06-AC-4 | Alle Relays des Empfängers **vor** dem Senden unerreichbar machen, Boost senden | Abbruch vor dem Mint-Swap: Guthaben vollständig zurück, Verlaufseintrag „fehlgeschlagen" | |
+| FR-29 (Restfall) | Relays erreichbar, aber keines antwortet mit `OK` | Gelockte Proofs bleiben mit Status „ausstehend" in der Warteschlange und werden erneut publiziert. Das Guthaben ist hier **nicht** wiederhergestellt — nach dem Swap gehören die Proofs dem Empfänger. Entschieden am 28.08.2026. | |
 | NR-02 | Netzwerk-Panel während Streaming und Boost | Ausgehende Verbindungen nur zu erlaubten Mints und den Relays aus kind:10019 | |
 | NR-09 | Vor und nach der Demo die NIP-60-Wallet des Testaccounts prüfen | Keine neuen kind:17375- oder kind:7375-Events, bestehende Wallet unverändert | |
 
