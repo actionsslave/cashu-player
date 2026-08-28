@@ -12,6 +12,8 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      // NR-04: keine Proofs in Konsolenausgaben.
+      'no-console': 'error',
     },
   },
   {
