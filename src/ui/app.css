@@ -82,3 +82,51 @@ button:disabled {
   font-size: 13px;
   color: var(--muted);
 }
+
+.wallet {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.wallet textarea {
+  display: block;
+  width: 100%;
+  min-height: 4.5rem;
+  margin: .35rem 0 .5rem;
+  font: 13px ui-monospace, monospace;
+  border: 1px solid var(--line);
+  border-radius: .4rem;
+  background: transparent;
+  color: inherit;
+  padding: .5rem;
+}
+
+.balance strong {
+  font-size: 1.6rem;
+}
+
+.storage-mode,
+.history {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.warning {
+  font-size: 13px;
+  border-left: 3px solid #d97706;
+  padding-left: .75rem;
+}
+
+.error {
+  font-size: 13px;
+  color: #dc2626;
+}
+
+.export-token {
+  font: 12px ui-monospace, monospace;
+  word-break: break-all;
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
+  padding: .5rem;
+  border-radius: .4rem;
+}
