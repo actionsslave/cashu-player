@@ -6,7 +6,7 @@
  * jeder Signatur; ein Freigabedialog macht sich als lange Dauer bemerkbar.
  * Das Urteil fällt der Mensch, siehe docs/manuelle-tests.md.
  */
-import { getProvider, type UnsignedNostrEvent } from './nip07.js';
+import { getProvider, type UnsignedNostrEvent } from '../identity/nip07.js';
 
 const out = document.getElementById('out') as HTMLElement;
 const status = document.getElementById('status') as HTMLElement;
