@@ -2,6 +2,7 @@ import { render } from 'preact';
 import { useMemo, useState } from 'preact/hooks';
 import { IdentityBar } from './ui/identity-bar.js';
 import { WalletPanel } from './ui/wallet-panel.js';
+import { FeedView } from './ui/feed-view.js';
 import { paymentCapability } from './payments/capability.js';
 import { LocalWallet } from './wallet/local-wallet.js';
 import { CashuMintGateway } from './wallet/cashu-mint-gateway.js';
@@ -26,6 +27,7 @@ function App() {
             Mints, Relays, Feed-Proxy oder Demo-npub.
           </p>
         )}
+        <FeedView />
         <WalletPanel wallet={wallet} onBalanceChange={setBalance} />
         {/* FR-05, FR-20: Streaming und Boost sind sichtbar deaktiviert, solange ihre
             Bedingungen nicht erfüllt sind. Paket E hängt hier den Player an. */}

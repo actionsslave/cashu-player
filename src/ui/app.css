@@ -130,3 +130,80 @@ button:disabled {
   padding: .5rem;
   border-radius: .4rem;
 }
+
+.feeds {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.add-feed {
+  display: flex;
+  gap: .5rem;
+}
+
+.add-feed input {
+  flex: 1;
+  font: inherit;
+  padding: .4rem .6rem;
+  border: 1px solid var(--line);
+  border-radius: .4rem;
+  background: transparent;
+  color: inherit;
+}
+
+.subscriptions,
+.episodes {
+  list-style: none;
+  padding: 0;
+}
+
+.subscription {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  flex-wrap: wrap;
+  padding: .5rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.subscription.selected {
+  font-weight: 600;
+}
+
+.cover {
+  border-radius: .3rem;
+  object-fit: cover;
+}
+
+button.link {
+  border: 0;
+  padding: 0;
+  color: var(--accent);
+  text-decoration: underline;
+  background: none;
+}
+
+.badge {
+  font-size: 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .1rem .5rem;
+  color: var(--muted);
+}
+
+.meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.episodes li {
+  padding: .6rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.description {
+  margin: .25rem 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
