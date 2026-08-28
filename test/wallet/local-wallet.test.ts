@@ -27,6 +27,20 @@ describe('FR-15: Guthaben', () => {
   });
 });
 
+describe('FR-15: Proofs aufnehmen', () => {
+  it('nimmt frische Proofs eines Mints in das verfügbare Guthaben auf', async () => {
+    await wallet.addProofs(MINT_A, [
+      { id: '00ad268c4d1f5826', amount: 7, secret: 'neu-1', C: `02${'a'.repeat(64)}` },
+    ]);
+    await expect(wallet.balance()).resolves.toBe(7);
+  });
+
+  it('nimmt eine leere Liste ohne Wirkung entgegen', async () => {
+    await wallet.addProofs(MINT_A, []);
+    await expect(wallet.balance()).resolves.toBe(0);
+  });
+});
+
 describe('FR-29: Reserve-Semantik', () => {
   it('nimmt reservierte Proofs aus dem verfügbaren Guthaben', async () => {
     await seedProofs([8, 8]);
@@ -79,6 +93,12 @@ describe('FR-29: Reserve-Semantik', () => {
     await seedProofs([5], MINT_A);
     await seedProofs([9], MINT_B);
     const bundle = await wallet.reserve(6, MINT_B);
+    expect(bundle.mintUrl).toBe(MINT_B);
+  });
+
+  it('erkennt den Mint normalisiert, nicht zeichengenau', async () => {
+    await seedProofs([9], MINT_B);
+    const bundle = await wallet.reserve(6, 'https://Mint-B.example/');
     expect(bundle.mintUrl).toBe(MINT_B);
   });
 

@@ -136,22 +136,9 @@ export class LocalWallet implements WalletService {
     // FR-18: spätestens jetzt liegt echtes Geld im Browser-Speicher.
     await ensurePersistentStorage();
 
+    const credited = await this.addProofs(mintUrl, received);
     const db = await openDatabase();
-    const tx = db.transaction(['proofs', 'history'], 'readwrite');
-    const proofStore = tx.objectStore('proofs');
-    let credited = 0;
-    for (const proof of received) {
-      const value = Number(proof.amount);
-      credited += value;
-      await proofStore.put({
-        secret: proof.secret,
-        mintUrl,
-        amount: value,
-        state: 'available',
-        proof,
-      });
-    }
-    await tx.objectStore('history').put({
+    await db.put('history', {
       id: crypto.randomUUID(),
       direction: 'in',
       amount: credited,
@@ -159,9 +146,23 @@ export class LocalWallet implements WalletService {
       status: 'empfangen',
       kind: 'import',
     });
-    await tx.done;
 
     return { amount: credited, mintUrl };
+  }
+
+  /** Nimmt frische Proofs eines Mints in den verfügbaren Bestand auf. */
+  async addProofs(mintUrl: string, proofs: StoredProof[]): Promise<number> {
+    if (proofs.length === 0) return 0;
+    const db = await openDatabase();
+    const tx = db.transaction('proofs', 'readwrite');
+    let added = 0;
+    for (const proof of proofs) {
+      const amount = Number(proof.amount);
+      added += amount;
+      await tx.store.put({ secret: proof.secret, mintUrl, amount, state: 'available', proof });
+    }
+    await tx.done;
+    return added;
   }
 
   async balance(): Promise<number> {
@@ -174,7 +175,7 @@ export class LocalWallet implements WalletService {
     const db = await openDatabase();
     const tx = db.transaction('proofs', 'readwrite');
     const available = (await tx.store.index('state').getAll('available')).filter(
-      (record) => mintUrl === undefined || record.mintUrl === mintUrl,
+      (record) => mintUrl === undefined || sameMint(record.mintUrl, mintUrl),
     );
 
     const byMint = new Map<string, ProofRecord[]>();

@@ -24,6 +24,11 @@ describe('IndexedDB-Schema', () => {
     expect([...store.indexNames]).toContain('feedId');
   });
 
+  it('FR-29: hält eine Warteschlange für noch nicht bestätigte Nutzaps', async () => {
+    const db = await openDatabase();
+    expect([...db.objectStoreNames]).toContain('pendingNutzaps');
+  });
+
   it('liefert bei mehrfachem Öffnen dieselbe Verbindung', async () => {
     const first = await openDatabase();
     const second = await openDatabase();

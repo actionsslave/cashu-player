@@ -7,7 +7,7 @@ import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { StoredProof } from '../contracts/index.js';
 
 export const DB_NAME = 'cashu-podcast-player';
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 
 export const STORES = [
   'session',
@@ -18,6 +18,7 @@ export const STORES = [
   'proofs',
   'history',
   'nutzapConfigs',
+  'pendingNutzaps',
 ] as const;
 
 /** Angemeldete Identität (FR-02). Kein privater Schlüssel, nur der Pubkey. */
@@ -102,6 +103,22 @@ export interface NutzapConfigRecord {
   fetchedAt: number;
 }
 
+/**
+ * FR-29: Ein Nutzap, dessen Proofs beim Mint bereits auf den Empfänger gelockt
+ * sind, dessen Event aber noch kein Relay bestätigt hat. Nach dem Swap gehören
+ * die Proofs dem Empfänger — freigeben ginge nicht, also wird erneut publiziert.
+ */
+export interface PendingNutzapRecord {
+  id: string;
+  /** Das fertig signierte kind:9321; ein erneuter Versuch braucht keine neue Signatur. */
+  event: { kind: number; created_at: number; tags: string[][]; content: string; id: string; pubkey: string; sig: string };
+  relays: string[];
+  /** Verweis auf den Verlaufseintrag, damit der Status nachgezogen werden kann. */
+  historyId: string;
+  createdAt: number;
+  attempts: number;
+}
+
 export interface PlayerDb extends DBSchema {
   session: { key: string; value: SessionRecord };
   settings: { key: string; value: SettingRecord };
@@ -111,13 +128,15 @@ export interface PlayerDb extends DBSchema {
   proofs: { key: string; value: ProofRecord; indexes: { state: string; mintUrl: string } };
   history: { key: string; value: HistoryRecord; indexes: { at: number } };
   nutzapConfigs: { key: string; value: NutzapConfigRecord };
+  pendingNutzaps: { key: string; value: PendingNutzapRecord };
 }
 
 let connection: Promise<IDBPDatabase<PlayerDb>> | undefined;
 
 export function openDatabase(): Promise<IDBPDatabase<PlayerDb>> {
   connection ??= openDB<PlayerDb>(DB_NAME, DB_VERSION, {
-    upgrade(db) {
+    upgrade(db, oldVersion) {
+      if (oldVersion < 1) {
       db.createObjectStore('session', { keyPath: 'key' });
       db.createObjectStore('settings', { keyPath: 'key' });
       db.createObjectStore('subscriptions', { keyPath: 'id' });
@@ -130,6 +149,10 @@ export function openDatabase(): Promise<IDBPDatabase<PlayerDb>> {
       const history = db.createObjectStore('history', { keyPath: 'id' });
       history.createIndex('at', 'at');
       db.createObjectStore('nutzapConfigs', { keyPath: 'pubkeyHex' });
+      }
+      if (oldVersion < 2) {
+        db.createObjectStore('pendingNutzaps', { keyPath: 'id' });
+      }
     },
   });
   return connection;
