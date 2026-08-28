@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A-01: Dauerfreigabe der NIP-07-Extension</title>
+    <style>
+      body { font: 15px/1.5 system-ui, sans-serif; margin: 2rem auto; max-width: 46rem; padding: 0 1rem; }
+      button { font: inherit; padding: .5rem .9rem; margin-right: .5rem; }
+      #out { margin-top: 1.5rem; font-family: ui-monospace, monospace; font-size: 13px; white-space: pre-wrap; }
+      .hint { background: #f4f4f5; padding: 1rem; border-left: 3px solid #999; }
+    </style>
+  </head>
+  <body>
+    <h1>A-01: Signiert die Extension wiederholt ohne Interaktion?</h1>
+    <p class="hint">
+      Ablauf: „Public Key holen“ wählen und die Freigabe in der Extension <strong>dauerhaft</strong>
+      erteilen. Danach eine Signaturserie starten und <strong>nichts anklicken</strong>. Erscheint ein
+      Extension-Fenster, ist A-01 falsch und die Rückfallebene aus Kapitel 6 greift.
+    </p>
+    <p id="status"></p>
+    <p>
+      <button id="pubkey" type="button">Public Key holen</button>
+      <button id="quick" type="button">3 Signaturen, 5 s Abstand</button>
+      <button id="realistic" type="button">3 Signaturen, 60 s Abstand</button>
+    </p>
+    <div id="out"></div>
+    <script type="module" src="/src/pruefung/a01-nip07.ts"></script>
+  </body>
+</html>
