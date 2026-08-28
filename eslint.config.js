@@ -20,7 +20,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['test/**/*.ts', 'test/**/*.tsx', 'tools/**/*.ts'],
+    files: ['test/**/*.ts', 'test/**/*.tsx', 'tools/**/*.ts', 'tools/**/*.mjs'],
     languageOptions: { globals: { ...globals.node } },
   },
 );
