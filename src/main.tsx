@@ -3,16 +3,21 @@ import { useMemo, useState } from 'preact/hooks';
 import { IdentityBar } from './ui/identity-bar.js';
 import { WalletPanel } from './ui/wallet-panel.js';
 import { FeedView } from './ui/feed-view.js';
+import { Player } from './ui/player.js';
 import { paymentCapability } from './payments/capability.js';
 import { LocalWallet } from './wallet/local-wallet.js';
 import { CashuMintGateway } from './wallet/cashu-mint-gateway.js';
 import { hasPlaceholders } from './config/build-config.js';
 import type { Session } from './identity/session.js';
+import type { EpisodeRecord } from './db/database.js';
 import './ui/app.css';
 
 function App() {
   const [session, setSession] = useState<Session | undefined>(undefined);
   const [balance, setBalance] = useState(0);
+  const [nowPlaying, setNowPlaying] = useState<
+    { episode: EpisodeRecord; podcastTitle: string; artworkUrl?: string } | undefined
+  >(undefined);
   const wallet = useMemo(() => new LocalWallet({ gateway: new CashuMintGateway() }), []);
   const capability = paymentCapability({ session, balance });
 
@@ -27,7 +32,20 @@ function App() {
             Mints, Relays, Feed-Proxy oder Demo-npub.
           </p>
         )}
-        <FeedView />
+        <FeedView
+          onEpisodeSelected={(episode, subscription) =>
+            setNowPlaying({
+              episode,
+              podcastTitle: subscription.title,
+              artworkUrl: subscription.imageUrl,
+            })
+          }
+        />
+        <Player
+          episode={nowPlaying?.episode}
+          podcastTitle={nowPlaying?.podcastTitle}
+          artworkUrl={nowPlaying?.artworkUrl}
+        />
         <WalletPanel wallet={wallet} onBalanceChange={setBalance} />
         {/* FR-05, FR-20: Streaming und Boost sind sichtbar deaktiviert, solange ihre
             Bedingungen nicht erfüllt sind. Paket E hängt hier den Player an. */}
