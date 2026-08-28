@@ -12,6 +12,13 @@ export default defineConfig({
         // Prüfseiten für die riskanten Annahmen A-01 und A-02.
         a01: resolve(import.meta.dirname, 'pruefung/a01-nip07.html'),
         a02: resolve(import.meta.dirname, 'pruefung/a02-mints.html'),
+        // FR-31: der Service Worker muss unter / liegen, sonst gilt sein Scope
+        // nur für den Asset-Ordner. Deshalb ohne Hash und ohne Unterverzeichnis.
+        sw: resolve(import.meta.dirname, 'src/sw.ts'),
+      },
+      output: {
+        entryFileNames: (chunk) =>
+          chunk.name === 'sw' ? 'sw.js' : 'assets/[name]-[hash].js',
       },
     },
   },
