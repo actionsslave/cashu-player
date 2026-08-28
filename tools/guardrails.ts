@@ -29,7 +29,12 @@ const RULES: Rule[] = [
   { id: 'NR-04', pattern: /\blocalStorage\b/ },
   { id: 'NR-04', pattern: /\bconsole\s*\.\s*(log|debug|info|warn|error|table|dir)\b/ },
   // NR-05: keine http- oder ws-Endpunkte.
-  { id: 'NR-05', pattern: /["'`]http:\/\// },
+  {
+    id: 'NR-05',
+    pattern: /["'`]http:\/\//,
+    // XML-Namespace-Bezeichner sind keine Endpunkte und werden nie abgerufen.
+    allow: (path) => path === 'src/feed/namespaces.ts',
+  },
   { id: 'NR-05', pattern: /["'`]ws:\/\// },
   // NR-03: der Feed-Proxy wird ausschließlich im Feed-Modul verwendet.
   {

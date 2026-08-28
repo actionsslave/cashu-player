@@ -64,6 +64,18 @@ describe('Guardrail-Scanner', () => {
     expect(found.map((v) => v.rule)).toContain('NR-04');
   });
 
+  it('NR-05: nimmt die Namespace-Datei von der http-Regel aus', () => {
+    const found = scanSource([
+      at('src/feed/namespaces.ts', "export const NS = 'http://www.itunes.com/dtds/podcast-1.0.dtd';"),
+    ]);
+    expect(found).toEqual([]);
+  });
+
+  it('NR-05: die Ausnahme gilt nur für diese eine Datei', () => {
+    const found = scanSource([at('src/feed/parse.ts', "const NS = 'http://beispiel.example';")]);
+    expect(found.map((v) => v.rule)).toContain('NR-05');
+  });
+
   it('behandelt // innerhalb eines String-Literals nicht als Kommentar', () => {
     const found = scanSource([at('src/x.ts', "const u = 'https://ok.example'; // Hinweis")]);
     expect(found).toEqual([]);
