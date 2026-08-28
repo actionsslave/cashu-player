@@ -8,6 +8,7 @@ import { listHistory } from '../wallet/history.js';
 import { readStorageMode, type StorageMode } from '../wallet/persistence.js';
 import { TokenImportError } from '../wallet/mint-gateway.js';
 import type { LocalWallet, TokenExport } from '../wallet/local-wallet.js';
+import { QrCode } from './qr-code.js';
 
 export interface WalletPanelProps {
   wallet: LocalWallet;
@@ -89,8 +90,7 @@ export function WalletPanel({ wallet, onBalanceChange }: WalletPanelProps) {
             {entry.amount} Sat bei {entry.mintUrl}
           </p>
           <p class="export-token">{entry.token}</p>
-          {/* TODO FR-16: QR-Code fehlt noch — dafür wird eine QR-Bibliothek gebraucht,
-              die Kapitel 5 nicht nennt. Entscheidung steht aus. */}
+          <QrCode value={entry.token} />
         </div>
       ))}
 

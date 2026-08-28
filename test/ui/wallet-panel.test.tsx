@@ -70,6 +70,13 @@ describe('FR-16: Sicherung', () => {
     const output = host.querySelector('.export-token')?.textContent ?? '';
     expect(output.startsWith('cashu')).toBe(true);
   });
+
+  it('US-04-AC-3: zeigt denselben Token zusätzlich als QR-Code', async () => {
+    await seedProofs([500]);
+    await mount(makeWallet());
+    await clickButton(host, 'Guthaben exportieren');
+    expect(host.querySelector('svg.qr')).not.toBeNull();
+  });
 });
 
 describe('FR-17: Aufladen', () => {

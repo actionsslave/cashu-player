@@ -33,6 +33,12 @@ describe('Negative Anforderungen im Quelltext', () => {
   it('NR-05, NR-08: keine Analytics-, Tracking- oder Error-Reporting-Abhängigkeit', () => {
     const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
     const deps = Object.keys(pkg.dependencies ?? {});
-    expect(deps.sort()).toEqual(['@cashu/cashu-ts', 'idb', 'nostr-tools', 'preact']);
+    expect(deps.sort()).toEqual([
+      '@cashu/cashu-ts',
+      'idb',
+      'nostr-tools',
+      'preact',
+      'qrcode-generator',
+    ]);
   });
 });
