@@ -44,6 +44,31 @@ describe('Guardrail-Scanner', () => {
     expect(found.map((v) => v.rule)).not.toContain('NR-01');
   });
 
+  it('ignoriert Fundstellen in Zeilenkommentaren', () => {
+    const found = scanSource([at('src/db/x.ts', '// localStorage ist gesperrt')]);
+    expect(found).toEqual([]);
+  });
+
+  it('ignoriert Fundstellen in Blockkommentaren', () => {
+    const source = ['/**', ' * Proofs stehen nie in localStorage.', ' */', 'export const x = 1;'].join('\n');
+    expect(scanSource([at('src/db/x.ts', source)])).toEqual([]);
+  });
+
+  it('findet Verstöße in der Codezeile hinter einem Blockkommentar', () => {
+    const source = ['/* Hinweis */', 'console.log(1);'].join('\n');
+    expect(scanSource([at('src/db/x.ts', source)]).map((v) => v.rule)).toContain('NR-04');
+  });
+
+  it('findet einen Verstoß vor einem Zeilenkommentar in derselben Zeile', () => {
+    const found = scanSource([at('src/db/x.ts', 'console.log(1); // Hinweis')]);
+    expect(found.map((v) => v.rule)).toContain('NR-04');
+  });
+
+  it('behandelt // innerhalb eines String-Literals nicht als Kommentar', () => {
+    const found = scanSource([at('src/x.ts', "const u = 'https://ok.example'; // Hinweis")]);
+    expect(found).toEqual([]);
+  });
+
   it('meldet nichts für unauffälligen Code', () => {
     expect(scanSource([at('src/feed/parse.ts', 'export const x = 1;')])).toEqual([]);
   });

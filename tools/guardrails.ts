@@ -39,10 +39,73 @@ const RULES: Rule[] = [
   },
 ];
 
+/**
+ * Ersetzt Kommentare zeilenweise durch Leerraum. Die Regeln zielen auf Code;
+ * ein Kommentar, der eine verbotene Konstruktion erklärt, ist kein Verstoß.
+ * String-Literale bleiben stehen — dort steckt gerade das, was NR-05 sucht.
+ * Zeilennummern bleiben erhalten, weil nur der Inhalt geleert wird.
+ */
+function stripComments(source: string): string[] {
+  type State = 'code' | 'block' | 'single' | 'double' | 'template';
+  let state: State = 'code';
+
+  return source.split('\n').map((line) => {
+    let out = '';
+    let index = 0;
+
+    while (index < line.length) {
+      const char = line[index];
+      const pair = line.slice(index, index + 2);
+
+      if (state === 'block') {
+        if (pair === '*/') {
+          state = 'code';
+          index += 2;
+        } else {
+          index += 1;
+        }
+        continue;
+      }
+
+      if (state !== 'code') {
+        out += char;
+        if (char === '\\') {
+          out += line[index + 1] ?? '';
+          index += 2;
+          continue;
+        }
+        const closes =
+          (state === 'single' && char === "'") ||
+          (state === 'double' && char === '"') ||
+          (state === 'template' && char === '`');
+        if (closes) state = 'code';
+        index += 1;
+        continue;
+      }
+
+      if (pair === '//') return out;
+      if (pair === '/*') {
+        state = 'block';
+        index += 2;
+        continue;
+      }
+      if (char === "'") state = 'single';
+      else if (char === '"') state = 'double';
+      else if (char === '`') state = 'template';
+      out += char;
+      index += 1;
+    }
+
+    // Einfache Strings enden am Zeilenende; nur Template-Literale laufen weiter.
+    if (state === 'single' || state === 'double') state = 'code';
+    return out;
+  });
+}
+
 export function scanSource(files: SourceFile[]): Violation[] {
   const violations: Violation[] = [];
   for (const file of files) {
-    const lines = file.content.split('\n');
+    const lines = stripComments(file.content);
     for (const rule of RULES) {
       if (rule.allow?.(file.path)) continue;
       lines.forEach((text, index) => {
