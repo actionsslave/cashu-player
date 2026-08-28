@@ -11,7 +11,10 @@ export default tseslint.config(
       globals: { ...globals.browser, ...globals.es2022 },
     },
     rules: {
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', ignoreRestSiblings: true },
+      ],
       // NR-04: keine Proofs in Konsolenausgaben.
       'no-console': 'error',
     },
