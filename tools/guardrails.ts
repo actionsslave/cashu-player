@@ -36,6 +36,8 @@ const RULES: Rule[] = [
     allow: (path) => path === 'src/feed/namespaces.ts',
   },
   { id: 'NR-05', pattern: /["'`]ws:\/\// },
+  // NR-10: nur der Service Worker fasst den Cache an, und nur nach shouldCache.
+  { id: 'NR-10', pattern: /\bcaches\s*\./, allow: (path) => path === 'src/sw.ts' },
   // NR-03: der Feed-Proxy wird ausschließlich im Feed-Modul verwendet.
   {
     id: 'NR-03',

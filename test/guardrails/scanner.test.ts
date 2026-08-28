@@ -76,6 +76,16 @@ describe('Guardrail-Scanner', () => {
     expect(found.map((v) => v.rule)).toContain('NR-05');
   });
 
+  it('NR-10: findet Cache-Zugriffe außerhalb des Service Workers', () => {
+    const found = scanSource([at('src/wallet/mint.ts', 'caches.open("x")')]);
+    expect(found.map((v) => v.rule)).toContain('NR-10');
+  });
+
+  it('NR-10: erlaubt Cache-Zugriffe im Service Worker', () => {
+    const found = scanSource([at('src/sw.ts', 'caches.open("x")')]);
+    expect(found.map((v) => v.rule)).not.toContain('NR-10');
+  });
+
   it('behandelt // innerhalb eines String-Literals nicht als Kommentar', () => {
     const found = scanSource([at('src/x.ts', "const u = 'https://ok.example'; // Hinweis")]);
     expect(found).toEqual([]);
