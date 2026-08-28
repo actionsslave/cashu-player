@@ -4,6 +4,8 @@ import { IdentityBar } from './ui/identity-bar.js';
 import { WalletPanel } from './ui/wallet-panel.js';
 import { FeedView } from './ui/feed-view.js';
 import { Player } from './ui/player.js';
+import { InstallButton } from './ui/install-button.js';
+import { registerServiceWorker } from './pwa/register.js';
 import { paymentCapability } from './payments/capability.js';
 import { LocalWallet } from './wallet/local-wallet.js';
 import { CashuMintGateway } from './wallet/cashu-mint-gateway.js';
@@ -24,6 +26,7 @@ function App() {
   return (
     <div class="app">
       <IdentityBar onSessionChange={setSession} />
+      <InstallButton />
       <main>
         <h1>Cashu-Podcast-Player</h1>
         {hasPlaceholders() && (
@@ -65,3 +68,6 @@ function App() {
 
 const root = document.getElementById('app');
 if (root) render(<App />, root);
+
+// Im Dev-Server gibt es kein gebautes /sw.js; die Registrierung liefe ins Leere.
+if (import.meta.env.PROD) void registerServiceWorker();

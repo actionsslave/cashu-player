@@ -105,6 +105,8 @@ bewusster Eingriff in NR-03 und muss gemeinsam entschieden werden.
 
 | ID | Was prüfen | Erwartetes Ergebnis | Ergebnis |
 |---|---|---|---|
+| FR-31 | DevTools → Application → Manifest und Service Workers | Manifest ohne Warnung, Service Worker „activated and is running" | |
+| FR-31 | Netz trennen, Seite neu laden | App-Shell startet aus dem Cache, keine unbehandelte Ausnahme (NFR-03) | |
 | FR-32 / US-08-AC-1 | App zum ersten Mal in Chrome über HTTPS öffnen | Schaltfläche „Installieren" erscheint | |
 | FR-32 / US-08-AC-3 | App installieren, danach im Browser-Tab öffnen | Keine Installieren-Schaltfläche | |
 | US-08-AC-2 | Installierte App starten | Eigenes Fenster ohne Adressleiste, Abos und Guthaben unverändert | |

@@ -233,3 +233,9 @@ button.link {
   margin-top: .5rem;
   accent-color: var(--accent);
 }
+
+.install {
+  margin-left: auto;
+  border-color: var(--accent);
+  color: var(--accent);
+}
