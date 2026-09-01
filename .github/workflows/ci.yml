@@ -1,0 +1,58 @@
+# Prüfungen bei jedem Push auf main und bei jedem Pull Request.
+#
+# Bewusst ohne Deployment-Schritt: Die Origin steht noch nicht fest (OQ-08),
+# und der Browser-Speicher haengt an ihr — ein Domainwechsel nach der ersten
+# Aufladung bedeutet neues Guthaben. Der Deploy-Schritt kommt erst dazu, wenn
+# die Entscheidung gefallen ist. Siehe docs/deployment.md.
+name: Pruefungen
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Nur lesen. Dieser Workflow braucht nichts zu schreiben.
+permissions:
+  contents: read
+
+# Ein laufender Durchgang wird abgebrochen, wenn neuer Code nachkommt.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pruefungen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # Actions auf Commit-SHA gepinnt: ein bewegliches Tag laesst sich
+      # umhaengen, ein SHA nicht.
+      - name: Quelltext holen
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node einrichten
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Abhaengigkeiten installieren
+        run: npm ci
+
+      # Der Guardrails-Scanner ist ein Modul, kein Skript: er laeuft ueber die
+      # Tests in test/guardrails/. Eigener Schritt, damit ein Verstoss gegen
+      # NR-01, NR-03, NR-04, NR-05, NR-09 oder NR-10 sofort sichtbar ist und
+      # nicht in 300 anderen Tests untergeht.
+      - name: Guardrails (NR-01 bis NR-10)
+        run: npx vitest run test/guardrails/
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Lint
+        run: npm run lint
