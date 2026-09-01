@@ -36,6 +36,11 @@ const RULES: Rule[] = [
     allow: (path) => path === 'src/feed/namespaces.ts',
   },
   { id: 'NR-05', pattern: /["'`]ws:\/\// },
+  // NR-09: keine kind:17375- oder kind:7375-Events. Die App schreibt
+  // ausschliesslich kind:9321; die NIP-60-Wallet des Nutzers bleibt unangetastet.
+  // Die Ziffernfolge 7375 steckt in 17375 — die Lookbehind-Grenze verhindert,
+  // dass ein Fund doppelt gemeldet wird.
+  { id: 'NR-09', pattern: /(?<!\d)(?:17375|7375)(?!\d)/ },
   // NR-10: nur der Service Worker fasst den Cache an, und nur nach shouldCache.
   { id: 'NR-10', pattern: /\bcaches\s*\./, allow: (path) => path === 'src/sw.ts' },
   // NR-03: der Feed-Proxy wird ausschließlich im Feed-Modul verwendet.

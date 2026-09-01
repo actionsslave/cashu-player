@@ -18,7 +18,7 @@ function collect(dir: string, out: SourceFile[] = []): SourceFile[] {
 }
 
 describe('Negative Anforderungen im Quelltext', () => {
-  it('NR-01, NR-03, NR-04, NR-05: src/ enthält keine verbotenen Muster', () => {
+  it('NR-01, NR-03, NR-04, NR-05, NR-09: src/ enthält keine verbotenen Muster', () => {
     const violations = scanSource(collect(join(ROOT, 'src')));
     expect(violations).toEqual([]);
   });

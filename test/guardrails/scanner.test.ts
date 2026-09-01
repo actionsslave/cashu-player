@@ -91,6 +91,29 @@ describe('Guardrail-Scanner', () => {
     expect(found).toEqual([]);
   });
 
+  it('NR-09: findet ein geschriebenes kind:17375 (NIP-60-Wallet)', () => {
+    const found = scanSource([at('src/payments/x.ts', 'const event = { kind: 17375, tags: [] };')]);
+    expect(found.map((v) => v.rule)).toContain('NR-09');
+  });
+
+  it('NR-09: findet ein geschriebenes kind:7375 (NIP-60-Token)', () => {
+    const found = scanSource([at('src/payments/x.ts', 'publish({ kind: 7375 })')]);
+    expect(found.map((v) => v.rule)).toContain('NR-09');
+  });
+
+  it('NR-09: schlaegt bei den erlaubten Arten 9321 und 10019 nicht an', () => {
+    const found = scanSource([
+      at('src/payments/nutzap.ts', 'export const NUTZAP_KIND = 9321;'),
+      at('src/payments/nutzap-config.ts', 'export const NUTZAP_INFO_KIND = 10019;'),
+    ]);
+    expect(found.map((v) => v.rule)).not.toContain('NR-09');
+  });
+
+  it('NR-09: schlaegt nicht an, wenn die Ziffernfolge Teil einer laengeren Zahl ist', () => {
+    const found = scanSource([at('src/x.ts', 'const n = 173750;')]);
+    expect(found.map((v) => v.rule)).not.toContain('NR-09');
+  });
+
   it('meldet nichts für unauffälligen Code', () => {
     expect(scanSource([at('src/feed/parse.ts', 'export const x = 1;')])).toEqual([]);
   });
