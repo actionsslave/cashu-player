@@ -44,6 +44,11 @@ export interface SubscriptionRecord {
   loadedViaProxy: boolean;
   /** FR-21: nostr-Identität des Podcasts aus dem Feed. */
   npub?: string;
+  /**
+   * FR-09: Anzahl aller Episoden im Feed, auch jenseits von EPISODES_PER_FEED.
+   * Optional, weil Abos aus aelteren Fassungen den Wert nicht tragen.
+   */
+  totalEpisodes?: number;
   addedAt: number;
   refreshedAt: number;
 }

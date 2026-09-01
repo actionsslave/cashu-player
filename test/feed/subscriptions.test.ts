@@ -73,10 +73,28 @@ describe('FR-07: Feed per URL hinzufügen', () => {
 });
 
 describe('FR-09: Abo-Liste und Abbestellen', () => {
-  it('nennt je Abo die Anzahl der Episoden', async () => {
+  it('nennt je Abo die Anzahl der gespeicherten Episoden', async () => {
     await subscribe(URL_A, { fetchImpl: serve(VOLLSTAENDIGER_FEED) });
     const [entry] = await listSubscriptions();
     expect(entry.episodeCount).toBe(2);
+  });
+
+  it('nennt die Gesamtzahl der Episoden im Feed, auch jenseits des Zuschnitts', async () => {
+    await subscribe(URL_A, { fetchImpl: serve(feedMitEpisoden(70)) });
+    const [entry] = await listSubscriptions();
+
+    expect(entry.totalEpisodes).toBe(70);
+    // Gespeichert bleibt der Zuschnitt — die Gesamtzahl ist eine Angabe ueber
+    // den Feed, kein Versprechen ueber den lokalen Bestand.
+    expect(entry.episodeCount).toBe(50);
+  });
+
+  it('zieht die Gesamtzahl bei einem Refresh nach', async () => {
+    const subscription = await subscribe(URL_A, { fetchImpl: serve(feedMitEpisoden(70)) });
+    await refreshSubscription(subscription.id, { fetchImpl: serve(feedMitEpisoden(71)) });
+
+    const [entry] = await listSubscriptions();
+    expect(entry.totalEpisodes).toBe(71);
   });
 
   it('löscht beim Abbestellen auch die Episodendaten', async () => {

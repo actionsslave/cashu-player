@@ -45,6 +45,11 @@ export interface ParsedFeed {
   /** FR-21: nostr-Identität des Podcasts, Primärquelle podcast:txt purpose="nostr". */
   npub?: string;
   value?: ValueBlock;
+  /**
+   * Anzahl aller Items im Feed, vor dem Zuschnitt auf EPISODES_PER_FEED.
+   * Eine Angabe ueber den Feed, kein Versprechen ueber den lokalen Bestand.
+   */
+  totalEpisodes: number;
   episodes: ParsedEpisode[];
 }
 
@@ -143,9 +148,7 @@ function readEpisodes(channel: Element): ParsedEpisode[] {
     });
   }
 
-  return episodes
-    .sort((a, b) => b.publishedAt - a.publishedAt)
-    .slice(0, EPISODES_PER_FEED);
+  return episodes.sort((a, b) => b.publishedAt - a.publishedAt);
 }
 
 export function parseFeed(xml: string): ParsedFeed {
@@ -160,6 +163,10 @@ export function parseFeed(xml: string): ParsedFeed {
   const title = text(child(channel, 'title'));
   if (!title) throw new FeedParseError();
 
+  // Erst alle Episoden, dann der Zuschnitt: die Gesamtzahl gehoert in die
+  // Abo-Zeile (FR-09) und waere nach dem Slice nicht mehr zu haben.
+  const alle = readEpisodes(channel);
+
   return {
     title,
     description: text(child(channel, 'description')) ?? '',
@@ -169,6 +176,7 @@ export function parseFeed(xml: string): ParsedFeed {
     podcastGuid: text(firstNs(channel, 'guid')),
     npub: readNpub(channel),
     value: readValue(channel),
-    episodes: readEpisodes(channel),
+    totalEpisodes: alle.length,
+    episodes: alle.slice(0, EPISODES_PER_FEED),
   };
 }

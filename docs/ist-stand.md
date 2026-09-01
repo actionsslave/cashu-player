@@ -31,7 +31,7 @@ angefasst. Alle Aussagen unten beziehen sich auf Quelltext und Testlauf.
 | FR-06 | umgesetzt | `src/identity/session.ts` → `logout()`; Dialog `src/ui/identity-bar.tsx:88` | `test/ui/identity-bar.test.tsx` | Dialog nennt ausdruecklich, dass die Wallet bleibt |
 | FR-07 | umgesetzt | `src/feed/subscriptions.ts` → `subscribe()`; `src/feed/parse.ts` → `parseFeed()` | `test/feed/subscriptions.test.ts`, `test/feed/parse.test.ts` | iTunes- und Podcast-Namespace inkl. `podcast:txt`, `podcast:value`, `valueRecipient` |
 | FR-08 | Code vorhanden, ungeprueft | `src/feed/fetch.ts` → Proxy-Zweitversuch | `test/feed/fetch.test.ts` | Proxy nur bei `reason === 'netz'`; HTTP-Fehler und Timeout loesen ihn bewusst nicht aus. `FEED_PROXY_URL` ist **leer** (OQ-03): der Zweitversuch wird uebersprungen, FR-08 ist damit codeseitig da, aber ohne Ziel |
-| FR-09 | umgesetzt | `src/feed/subscriptions.ts` → `listSubscriptions()`, `unsubscribe()` | `test/feed/subscriptions.test.ts`, `test/ui/feed-view.test.tsx` | Abbestellen loescht Episoden in derselben Transaktion |
+| FR-09 | umgesetzt | `src/feed/subscriptions.ts` → `listSubscriptions()`, `unsubscribe()`; `parseFeed()` → `totalEpisodes` | `test/feed/subscriptions.test.ts`, `test/feed/parse.test.ts`, `test/ui/feed-view.test.tsx` | Abbestellen loescht Episoden in derselben Transaktion. Die Abo-Zeile nennt seit 01.09.2026 die Gesamtzahl im Feed, nicht den lokalen Bestand; aeltere Abos fallen auf den Bestand zurueck |
 | FR-10 | umgesetzt | `src/feed/parse.ts:148` (`EPISODES_PER_FEED`); `listEpisodes()`; Darstellung `src/ui/feed-view.tsx` | `test/feed/parse.test.ts`, `test/feed/subscriptions.test.ts`, `test/ui/feed-view.test.tsx` | 50 Episoden geladen und gespeichert (`EPISODES_PER_FEED`), davon 3 sichtbar (`EPISODES_VISIBLE`), absteigend nach Datum, je Episode nur der Titel. Am 01.09.2026 auf Nutzerwunsch zweimal reduziert; FR-10 im Dokument mitgezogen |
 | FR-11 | umgesetzt | `src/feed/fetch.ts` (`FEED_TIMEOUT_MS`); `refreshSubscription()` | `test/feed/fetch.test.ts` | Bei Fehler bleibt der letzte Stand, `feed-view.tsx:83` faengt ab |
 | FR-12 | umgesetzt | `src/ui/player.tsx` → `start`, `halt`, `skip`, `scrubTo` | `test/ui/player.test.tsx` | +30 s / −15 s, Fortschrittsleiste |
@@ -167,7 +167,10 @@ Anforderungs-Dokument mitgezogen, damit Code und Dokument nicht auseinander
 laufen. Datum, Dauer und Beschreibung werden weiterhin geparst und in
 IndexedDB gespeichert; sie sind nur nicht dargestellt. Im selben Zug wurde die
 Anzeigemenge auf 3 Episoden begrenzt (`EPISODES_VISIBLE`), getrennt von der
-Abrufmenge von 50 (`EPISODES_PER_FEED`). **Erledigt.**
+Abrufmenge von 50 (`EPISODES_PER_FEED`). Weil die Abo-Zeile damit "50 Episoden"
+meldete, waehrend drei sichtbar waren, nennt sie jetzt die Gesamtzahl im Feed
+(`totalEpisodes`, beim Parsen vor dem Zuschnitt gezaehlt) — bei Darknet Diaries
+180 statt 50. FR-09 im Dokument praezisiert. **Erledigt.**
 
 **Offen dabei:** Die Beschreibung wurde als roher HTML-Text angezeigt, statt
 als Markup interpretiert oder bereinigt zu werden. Das ist jetzt unsichtbar,

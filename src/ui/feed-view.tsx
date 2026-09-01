@@ -130,7 +130,12 @@ export function FeedView({ fetchImpl, proxyUrl, onEpisodeSelected }: FeedViewPro
             <button type="button" class="link" onClick={() => void reload(subscription.id)}>
               {subscription.title}
             </button>
-            <span class="meta">{subscription.episodeCount} Episoden</span>
+            {/*
+              FR-09: die Gesamtzahl des Feeds, nicht der lokale Bestand — sie
+              beantwortet die Frage "wie gross ist dieser Podcast". Aeltere Abos
+              tragen den Wert nicht; dann bleibt der gespeicherte Bestand.
+            */}
+            <span class="meta">{subscription.totalEpisodes ?? subscription.episodeCount} Episoden</span>
             {subscription.loadedViaProxy && <span class="badge">über Proxy geladen</span>}
             <button type="button" onClick={() => void handleRefresh(subscription.id)}>
               Aktualisieren

@@ -47,6 +47,7 @@ async function storeFeed(
     imageUrl: parsed.imageUrl,
     loadedViaProxy: viaProxy,
     npub: parsed.npub,
+    totalEpisodes: parsed.totalEpisodes,
     addedAt,
     refreshedAt: Date.now(),
   };

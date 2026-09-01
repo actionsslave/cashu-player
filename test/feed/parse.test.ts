@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { EPISODES_PER_FEED } from '../../src/config/build-config.js';
 import { FeedParseError, parseFeed } from '../../src/feed/parse.js';
 import { FEED_OHNE_NOSTR, VOLLSTAENDIGER_FEED, feedMitEpisoden } from './fixtures.js';
 
@@ -84,6 +85,21 @@ describe('FR-21: nostr-Identität aus dem Feed', () => {
       <channel><title>T</title>
       <podcast:txt purpose="nostr">kein-npub</podcast:txt></channel></rss>`;
     expect(parseFeed(feed).npub).toBeUndefined();
+  });
+});
+
+describe('FR-09: Gesamtzahl der Episoden im Feed', () => {
+  it('zaehlt alle Items, auch die ueber EPISODES_PER_FEED hinaus', () => {
+    const parsed = parseFeed(feedMitEpisoden(70));
+    expect(parsed.totalEpisodes).toBe(70);
+    // Gespeichert wird trotzdem nur der Zuschnitt.
+    expect(parsed.episodes).toHaveLength(EPISODES_PER_FEED);
+  });
+
+  it('zaehlt bei kleinen Feeds genau die vorhandenen Episoden', () => {
+    const parsed = parseFeed(VOLLSTAENDIGER_FEED);
+    expect(parsed.totalEpisodes).toBe(2);
+    expect(parsed.episodes).toHaveLength(2);
   });
 });
 

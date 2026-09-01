@@ -112,6 +112,17 @@ describe('FR-09: Abbestellen', () => {
   });
 });
 
+describe('FR-09: Anzahl in der Abo-Zeile', () => {
+  it('nennt die Gesamtzahl des Feeds, nicht die sichtbaren oder gespeicherten', async () => {
+    await mount(serve(feedMitEpisoden(70)));
+    await addFeed();
+
+    const zeile = host.querySelector('.subscription')?.textContent ?? '';
+    expect(zeile).toContain('70 Episoden');
+    expect(host.querySelectorAll('.episodes li')).toHaveLength(EPISODES_VISIBLE);
+  });
+});
+
 describe('FR-10: Episodenliste', () => {
   it('zeigt je Episode nur den Titel', async () => {
     await mount(serve(VOLLSTAENDIGER_FEED));
