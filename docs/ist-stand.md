@@ -32,7 +32,7 @@ angefasst. Alle Aussagen unten beziehen sich auf Quelltext und Testlauf.
 | FR-07 | umgesetzt | `src/feed/subscriptions.ts` → `subscribe()`; `src/feed/parse.ts` → `parseFeed()` | `test/feed/subscriptions.test.ts`, `test/feed/parse.test.ts` | iTunes- und Podcast-Namespace inkl. `podcast:txt`, `podcast:value`, `valueRecipient` |
 | FR-08 | Code vorhanden, ungeprueft | `src/feed/fetch.ts` → Proxy-Zweitversuch | `test/feed/fetch.test.ts` | Proxy nur bei `reason === 'netz'`; HTTP-Fehler und Timeout loesen ihn bewusst nicht aus. `FEED_PROXY_URL` ist **leer** (OQ-03): der Zweitversuch wird uebersprungen, FR-08 ist damit codeseitig da, aber ohne Ziel |
 | FR-09 | umgesetzt | `src/feed/subscriptions.ts` → `listSubscriptions()`, `unsubscribe()` | `test/feed/subscriptions.test.ts`, `test/ui/feed-view.test.tsx` | Abbestellen loescht Episoden in derselben Transaktion |
-| FR-10 | umgesetzt | `src/feed/parse.ts:148` (`EPISODES_PER_FEED`); `listEpisodes()` | `test/feed/parse.test.ts`, `test/feed/subscriptions.test.ts` | 50 Episoden, absteigend nach Datum |
+| FR-10 | umgesetzt | `src/feed/parse.ts:148` (`EPISODES_PER_FEED`); `listEpisodes()`; Darstellung `src/ui/feed-view.tsx` | `test/feed/parse.test.ts`, `test/feed/subscriptions.test.ts`, `test/ui/feed-view.test.tsx` | 50 Episoden, absteigend nach Datum, je Episode nur der Titel. Am 01.09.2026 auf Nutzerwunsch von Titel plus Datum, Dauer und Beschreibung auf den Titel allein reduziert; FR-10 im Dokument mitgezogen |
 | FR-11 | umgesetzt | `src/feed/fetch.ts` (`FEED_TIMEOUT_MS`); `refreshSubscription()` | `test/feed/fetch.test.ts` | Bei Fehler bleibt der letzte Stand, `feed-view.tsx:83` faengt ab |
 | FR-12 | umgesetzt | `src/ui/player.tsx` → `start`, `halt`, `skip`, `scrubTo` | `test/ui/player.test.tsx` | +30 s / −15 s, Fortschrittsleiste |
 | FR-13 | Code vorhanden, ungeprueft | `src/player/media-session.ts` | `test/player/media-session.test.ts` | Ob das Betriebssystem Titel und Cover wirklich anzeigt und die Medientaste durchkommt, sagt kein jsdom-Test |
@@ -158,6 +158,19 @@ Am 01.09.2026 gesetzt, nachdem die Entscheidungen gefallen sind:
 `hasPlaceholders()` liefert damit `false`, die Warnung im UI ist weg. Das
 heisst **nicht**, dass die Konfiguration demo-fertig ist: Der Testmint ist eine
 Entwicklungsentscheidung, kein Demo-Mint, und A-05 ist unerfuellt.
+
+**5. FR-10 auf Nutzerwunsch geaendert.** Die Episodenliste zeigte Titel,
+Datum, Dauer und Beschreibung. Die Beschreibungen der Feeds sind lang und
+enthalten rohes HTML, das als Text durchschlug — die Liste war damit
+unbrauchbar. Am 01.09.2026 auf den Titel allein reduziert und FR-10 im
+Anforderungs-Dokument mitgezogen, damit Code und Dokument nicht auseinander
+laufen. Datum, Dauer und Beschreibung werden weiterhin geparst und in
+IndexedDB gespeichert; sie sind nur nicht dargestellt. **Erledigt.**
+
+**Offen dabei:** Die Beschreibung wurde als roher HTML-Text angezeigt, statt
+als Markup interpretiert oder bereinigt zu werden. Das ist jetzt unsichtbar,
+aber nicht behoben — wer die Beschreibung wieder einblendet, holt sich den
+Fehler zurueck.
 
 ## Blockiert
 

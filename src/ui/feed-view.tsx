@@ -162,6 +162,13 @@ export function FeedView({ fetchImpl, proxyUrl, onEpisodeSelected }: FeedViewPro
               nostr-Identität.
             </p>
           )}
+          {/*
+            FR-10: bewusst nur der Titel. Datum, Dauer und Beschreibung stehen
+            weiterhin am EpisodeRecord und werden beim Parsen gespeichert — sie
+            sind hier nur nicht sichtbar, weil die Beschreibungen der Feeds die
+            Liste unlesbar machen. Der Titel waehlt die Episode aus; die
+            Wiedergabe uebernimmt der Player.
+          */}
           <ul class="episodes">
             {episodes.map((episode) => (
               <li key={episode.id}>
@@ -172,11 +179,6 @@ export function FeedView({ fetchImpl, proxyUrl, onEpisodeSelected }: FeedViewPro
                 >
                   {episode.title}
                 </button>
-                <span class="meta">
-                  {new Date(episode.publishedAt).toLocaleDateString('de-DE')}
-                  {episode.durationSeconds ? ` · ${formatDuration(episode.durationSeconds)}` : ''}
-                </span>
-                <p class="description">{episode.description}</p>
               </li>
             ))}
           </ul>

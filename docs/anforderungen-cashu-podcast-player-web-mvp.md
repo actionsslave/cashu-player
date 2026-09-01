@@ -58,7 +58,7 @@
 | FR-07 | Ein Feed wird per URL-Eingabe hinzugefügt; die App lädt ihn, parst RSS 2.0, den iTunes-Namespace und den Podcast-Namespace (mindestens `podcast:guid`, `podcast:value`, `podcast:valueRecipient`, `podcast:txt`) und legt ihn als Abo an. |
 | FR-08 | Scheitert der direkte Abruf eines Feeds an fehlenden CORS-Headern, wiederholt die App den Abruf einmalig über einen im Build konfigurierten Feed-Proxy und markiert das Abo sichtbar als „über Proxy geladen". |
 | FR-09 | Die Abo-Liste zeigt Cover, Titel und Anzahl Episoden; Abbestellen erfolgt nach Bestätigungsdialog und löscht auch die Episodendaten. |
-| FR-10 | Pro Feed werden die 50 neuesten Episoden mit Titel, Veröffentlichungsdatum, Dauer und Beschreibung angezeigt, absteigend nach Datum. |
+| FR-10 | Pro Feed werden die 50 neuesten Episoden absteigend nach Datum angezeigt, je Episode **ausschließlich der Titel**. Der Titel ist anklickbar und wählt die Episode zur Wiedergabe aus. Veröffentlichungsdatum, Dauer und Beschreibung werden weiterhin geparst und gespeichert, aber nicht in der Liste dargestellt: Die Beschreibungen der Feeds sind lang und enthalten rohes HTML, was die Liste unbrauchbar macht. Geändert am 01.09.2026. |
 | FR-11 | Ein manueller Refresh lädt den Feed neu; nach 10 s Timeout oder bei HTTP-Fehler bleibt der letzte Stand sichtbar und ein Fehlerhinweis erscheint. |
 
 **Wiedergabe**

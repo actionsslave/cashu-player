@@ -112,14 +112,40 @@ describe('FR-09: Abbestellen', () => {
 });
 
 describe('FR-10: Episodenliste', () => {
-  it('zeigt Veröffentlichungsdatum, Dauer und Beschreibung', async () => {
+  it('zeigt je Episode nur den Titel', async () => {
     await mount(serve(VOLLSTAENDIGER_FEED));
     await addFeed();
 
     const episodes = host.querySelector('.episodes')?.textContent ?? '';
-    expect(episodes).toContain('1:02:03');
-    expect(episodes).toContain('Die zweite Folge');
-    expect(episodes).toContain('12.8.2025');
+    expect(episodes).toContain('Folge 2');
+    expect(episodes).toContain('Folge 1');
+    // Dauer, Datum und Beschreibung gehoeren nicht mehr in die Liste.
+    expect(episodes).not.toContain('1:02:03');
+    expect(episodes).not.toContain('12.8.2025');
+    expect(episodes).not.toContain('Die zweite Folge');
+  });
+
+  it('US-02-AC-1: haelt die Reihenfolge absteigend nach Datum', async () => {
+    await mount(serve(VOLLSTAENDIGER_FEED));
+    await addFeed();
+
+    const titles = [...host.querySelectorAll('.episodes button')].map((b) => b.textContent);
+    expect(titles).toEqual(['Folge 2', 'Folge 1']);
+  });
+
+  it('macht den Titel anklickbar und meldet die Episode nach oben', async () => {
+    const onEpisodeSelected = vi.fn();
+    render(<FeedView fetchImpl={serve(VOLLSTAENDIGER_FEED)} onEpisodeSelected={onEpisodeSelected} />, host);
+    await flush();
+    await addFeed();
+
+    await clickButton(host.querySelector('.episodes') as HTMLElement, 'Folge 2');
+
+    expect(onEpisodeSelected).toHaveBeenCalledTimes(1);
+    const [episode, subscription] = onEpisodeSelected.mock.calls[0];
+    expect(episode).toMatchObject({ title: 'Folge 2' });
+    expect(episode.enclosureUrl).toMatch(/^https:\/\//);
+    expect(subscription).toMatchObject({ title: 'Testpodcast' });
   });
 });
 
