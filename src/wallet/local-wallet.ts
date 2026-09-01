@@ -11,7 +11,7 @@ import {
   normalizeMintUrl,
   normalizeProofAmounts,
 } from '@cashu/cashu-ts';
-import { ALLOWED_MINTS } from '../config/build-config.js';
+import { ALLOWED_MINTS, WALLET_UNIT } from '../config/build-config.js';
 import { openDatabase, type ProofRecord } from '../db/database.js';
 import {
   MintUnreachableError,
@@ -101,8 +101,11 @@ export class LocalWallet implements WalletService {
   /** FR-17: Token prüfen, einlösen, Proofs und Verlaufseintrag speichern. */
   async importToken(token: string): Promise<ImportResult> {
     let mintUrl: string;
+    let unit: string;
     try {
-      mintUrl = getTokenMetadata(token).mint;
+      const metadata = getTokenMetadata(token);
+      mintUrl = metadata.mint;
+      unit = metadata.unit;
     } catch (cause) {
       throw new TokenImportError('ungueltig', 'Kein gültiger Cashu-Token.', { cause });
     }
@@ -112,6 +115,16 @@ export class LocalWallet implements WalletService {
       throw new TokenImportError(
         'mint-nicht-erlaubt',
         `Der Mint ${mintUrl} steht nicht in der erlaubten Liste.`,
+      );
+    }
+
+    // Ein Mint kann mehrere Einheiten führen. Ohne diese Prüfung landete ein
+    // usd-Token als Sat im Guthaben, und der Export etikettierte ihn falsch.
+    // Vor dem Mint-Aufruf, damit ein nicht erreichbarer Mint den Grund nicht verdeckt.
+    if (unit !== WALLET_UNIT) {
+      throw new TokenImportError(
+        'einheit-nicht-unterstuetzt',
+        `Der Token lautet auf ${unit}. Die Wallet führt ausschließlich ${WALLET_UNIT}.`,
       );
     }
 
@@ -261,7 +274,7 @@ export class LocalWallet implements WalletService {
       amount: sum(records),
       token: getEncodedToken({
         mint: mintUrl,
-        unit: 'sat',
+        unit: WALLET_UNIT,
         proofs: normalizeProofAmounts(records.map((record) => record.proof)),
       }),
     }));

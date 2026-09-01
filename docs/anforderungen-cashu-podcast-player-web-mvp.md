@@ -75,7 +75,7 @@
 |---|---|
 | FR-15 | Die App führt eine lokale Cashu-Wallet über eine im Build konfigurierte Liste erlaubter Mints und zeigt das Guthaben in Sat an. |
 | FR-16 | Die Wallet lässt sich jederzeit als Cashu-Token exportieren (Anzeige als Text und QR-Code); vor der ersten Aufladung zeigt die App einen Hinweis, dass Löschen der Website-Daten das Guthaben vernichtet. |
-| FR-17 | Die Wallet lässt sich durch Einfügen eines Cashu-Tokens aufladen; ungültige, bei einem nicht erlaubten Mint ausgestellte oder bereits eingelöste Token werden mit konkretem Fehlertext abgelehnt. |
+| FR-17 | Die Wallet lässt sich durch Einfügen eines Cashu-Tokens aufladen; ungültige, bei einem nicht erlaubten Mint ausgestellte, **auf eine andere Einheit als Sat lautende** oder bereits eingelöste Token werden mit konkretem Fehlertext abgelehnt. Die Einheit wird vor dem ersten Mint-Aufruf geprüft, damit ein nicht erreichbarer Mint den Grund nicht verdeckt. Ergänzt am 01.09.2026. |
 | FR-18 | Beim ersten Aufladen fordert die App über `navigator.storage.persist()` dauerhaften Speicher an und zeigt das Ergebnis in den Wallet-Einstellungen als „dauerhaft" oder „best effort" an. |
 | FR-19 | Ein Verlauf zeigt je Zahlung Richtung, Betrag in Sat, Zeitstempel, Podcast/Episode und Status (`gesendet`, `ausstehend`, `fehlgeschlagen`). |
 | FR-20 | Unterschreitet das Guthaben 10 Sat, stoppt die App laufende Streaming-Zahlungen, zeigt einen Hinweis und setzt sie nach erfolgreicher Aufladung fort. |

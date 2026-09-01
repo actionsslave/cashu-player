@@ -5,6 +5,7 @@
  * `p` (Empfänger). Signiert wird über die Extension, publiziert an die Relays
  * aus dem kind:10019 — beides passiert in pay.ts.
  */
+import { WALLET_UNIT } from '../config/build-config.js';
 import type { ResolvedPaymentTarget, StoredProof } from '../contracts/index.js';
 import type { UnsignedNostrEvent } from '../identity/nip07.js';
 
@@ -33,7 +34,7 @@ export function buildNutzap(input: NutzapInput): UnsignedNostrEvent {
     created_at: Math.floor(Date.now() / 1000),
     tags: [
       ...input.proofs.map((proof) => ['proof', JSON.stringify(proof)]),
-      ['unit', 'sat'],
+      ['unit', WALLET_UNIT],
       ['u', input.mintUrl],
       ['p', input.target.pubkeyHex],
     ],

@@ -1,3 +1,5 @@
+import { WALLET_UNIT } from '../config/build-config.js';
+
 /**
  * Auswertung der Mint-Prüfung für A-02 (Browser-Erreichbarkeit, CORS) und
  * A-05 (NUT-11, NUT-12, keine Fees).
@@ -34,7 +36,7 @@ function supports(info: MintInfoLike, nut: string): boolean {
 
 export function summarizeMint(info: MintInfoLike, keysets: KeysetLike[]): MintSummary {
   const activeSatFees = keysets
-    .filter((keyset) => keyset.active && keyset.unit === 'sat')
+    .filter((keyset) => keyset.active && keyset.unit === WALLET_UNIT)
     .map((keyset) => keyset.input_fee_ppk ?? 0);
   const maxInputFeePpk = activeSatFees.length > 0 ? Math.max(...activeSatFees) : 0;
   return {

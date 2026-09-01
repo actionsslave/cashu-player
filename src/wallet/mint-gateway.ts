@@ -35,6 +35,7 @@ export class MintUnreachableError extends Error {
 export type TokenImportFailure =
   | 'ungueltig'
   | 'mint-nicht-erlaubt'
+  | 'einheit-nicht-unterstuetzt'
   | 'bereits-eingeloest'
   | 'mint-nicht-erreichbar';
 

@@ -63,6 +63,16 @@ export const STREAMING_RATE_MAX = 1000;
 /** Streaming-Intervall in Sekunden gehörter Zeit (FR-25, OQ-04). */
 export const STREAMING_INTERVAL_SECONDS = 60;
 
+/**
+ * Die einzige Einheit, die die Wallet fuehrt (FR-15, FR-17).
+ *
+ * Guthaben, Export und das `unit`-Tag des Nutzaps (FR-27) haengen alle daran.
+ * Mints koennen mehrere Einheiten anbieten — testnut.cashu.space etwa sat,
+ * msat, usd und eur — deshalb wird sie beim Import geprueft und nicht
+ * angenommen.
+ */
+export const WALLET_UNIT = 'sat';
+
 /** Untergrenze, ab der Streaming-Zahlungen stoppen (FR-20). */
 export const MIN_BALANCE_SATS = 10;
 

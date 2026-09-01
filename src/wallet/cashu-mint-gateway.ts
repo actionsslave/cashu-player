@@ -12,6 +12,7 @@ import {
   Wallet,
   type Proof,
 } from '@cashu/cashu-ts';
+import { WALLET_UNIT } from '../config/build-config.js';
 import type { StoredProof } from '../contracts/index.js';
 import { MintUnreachableError, type MintGateway } from './mint-gateway.js';
 
@@ -36,7 +37,7 @@ export class CashuMintGateway implements MintGateway {
     let pending = this.wallets.get(mintUrl);
     if (!pending) {
       pending = mapNetworkError(mintUrl, async () => {
-        const wallet = new Wallet(mintUrl, { unit: 'sat' });
+        const wallet = new Wallet(mintUrl, { unit: WALLET_UNIT });
         await wallet.loadMint();
         return wallet;
       }).catch((error: unknown) => {

@@ -5,10 +5,10 @@ import { MintUnreachableError } from '../../src/wallet/mint-gateway.js';
 
 let counter = 0;
 
-export function encodeToken(mintUrl: string, amounts: number[]): string {
+export function encodeToken(mintUrl: string, amounts: number[], unit = 'sat'): string {
   return getEncodedToken({
     mint: mintUrl,
-    unit: 'sat',
+    unit,
     proofs: amounts.map((amount) => {
       const secret = `token-secret-${(counter += 1)}`;
       return { id: '00ad268c4d1f5826', amount: Amount.from(amount), secret, C: '02'.padEnd(66, 'a') };

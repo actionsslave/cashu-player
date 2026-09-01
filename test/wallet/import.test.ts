@@ -74,6 +74,39 @@ describe('FR-17: Wallet per Token aufladen', () => {
     expect(error.message).toMatch(/Mint/i);
   });
 
+  it('lehnt einen Token in einer anderen Einheit ab und nennt sie', async () => {
+    // testnut.cashu.space fuehrt sat, msat, usd und eur. Ohne Pruefung landete
+    // ein usd-Token als "Sat" im Guthaben und der Export etikettierte ihn falsch.
+    const wallet = makeWallet();
+    const error = await wallet.importToken(encodeToken(ERLAUBT, [20], 'usd')).catch((e) => e);
+
+    expect(error).toBeInstanceOf(TokenImportError);
+    expect(error.reason).toBe('einheit-nicht-unterstuetzt');
+    expect(error.message).toContain('usd');
+    expect(error.message).toContain('sat');
+  });
+
+  it('ein Token in fremder Einheit veraendert das Guthaben nicht', async () => {
+    const wallet = makeWallet(fakeGateway({ received: freshProofs(ERLAUBT, [20]) }));
+    await wallet.importToken(encodeToken(ERLAUBT, [20], 'usd')).catch(() => undefined);
+    await expect(wallet.balance()).resolves.toBe(0);
+  });
+
+  it('prueft die Einheit, bevor der Mint ueberhaupt gefragt wird', async () => {
+    // Ein nicht erreichbarer Mint darf den Einheiten-Grund nicht verdecken.
+    const wallet = makeWallet(fakeGateway({ unreachable: true }));
+    await expect(wallet.importToken(encodeToken(ERLAUBT, [20], 'eur'))).rejects.toMatchObject({
+      reason: 'einheit-nicht-unterstuetzt',
+    });
+  });
+
+  it('nimmt msat nicht als sat durch', async () => {
+    const wallet = makeWallet();
+    await expect(wallet.importToken(encodeToken(ERLAUBT, [20], 'msat'))).rejects.toMatchObject({
+      reason: 'einheit-nicht-unterstuetzt',
+    });
+  });
+
   it('NR-07: vergleicht Mint-URLs normalisiert, nicht zeichengenau', async () => {
     const wallet = new LocalWallet({
       gateway: fakeGateway({ received: freshProofs(ERLAUBT, [10]) }),
