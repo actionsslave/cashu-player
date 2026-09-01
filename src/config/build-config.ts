@@ -92,6 +92,18 @@ export const EPISODES_PER_FEED = 50;
  */
 export const EPISODES_VISIBLE = 3;
 
+/**
+ * Wählbare Abspielgeschwindigkeiten (FR-12).
+ * Die Hörzeit zählt in Medienzeit: Bei 2× läuft der Streaming-Zähler doppelt
+ * so schnell hoch, weil in derselben Wanduhrzeit doppelt so viel Inhalt
+ * gehört wird. Der ListeningTicker rechnet den Faktor in seine
+ * Sprungerkennung ein (siehe listening-ticker.ts).
+ */
+export const PLAYBACK_RATES: readonly number[] = [0.8, 1, 1.2, 1.5, 1.8, 2, 2.1];
+
+/** Vorgabe der Abspielgeschwindigkeit (FR-12). */
+export const PLAYBACK_RATE_DEFAULT = 1;
+
 /** Persistenzintervall der Hörposition in Millisekunden (FR-14). */
 export const POSITION_PERSIST_INTERVAL_MS = 10_000;
 

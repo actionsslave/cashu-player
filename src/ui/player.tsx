@@ -9,9 +9,15 @@ import { ListeningTicker } from '../player/listening-ticker.js';
 import { PositionPersister, loadPosition } from '../player/position-store.js';
 import { setMediaSessionHandlers, updateMediaSession } from '../player/media-session.js';
 import { formatDuration } from './feed-view.js';
+import { PLAYBACK_RATES, PLAYBACK_RATE_DEFAULT } from '../config/build-config.js';
 
 const SKIP_FORWARD_SECONDS = 30;
 const SKIP_BACKWARD_SECONDS = 15;
+
+/** 0.8 wird zu "0,8x", 1 zu "1x" — ohne nachlaufende Null. */
+function formatRate(rate: number): string {
+  return `${String(rate).replace('.', ',')}x`;
+}
 
 export interface PlayerProps {
   episode?: EpisodeRecord;
@@ -24,6 +30,7 @@ export function Player({ episode, podcastTitle = '', artworkUrl, onTick }: Playe
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [position, setPosition] = useState(0);
+  const [rate, setRate] = useState(PLAYBACK_RATE_DEFAULT);
 
   const episodeId = episode?.id;
   const duration = episode?.durationSeconds ?? 0;
@@ -57,6 +64,13 @@ export function Player({ episode, podcastTitle = '', artworkUrl, onTick }: Playe
     // Bewusst nur an der Episode: ein Wechsel des Handlers soll die Wiedergabe
     // nicht neu aufsetzen.
   }, [episodeId, episode, onTick]);
+
+  // FR-12: Die Geschwindigkeit gilt weiter, wenn die Episode wechselt — ein
+  // Wechsel der Quelle setzt sie am Element sonst auf defaultPlaybackRate.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) audio.playbackRate = rate;
+  }, [rate, episodeId]);
 
   // FR-13: Titel, Cover und Zustand an die Systemsteuerung melden.
   useEffect(() => {
@@ -143,6 +157,24 @@ export function Player({ episode, podcastTitle = '', artworkUrl, onTick }: Playe
           {formatDuration(Math.floor(position))}
           {duration > 0 ? ` / ${formatDuration(duration)}` : ''}
         </span>
+        {/*
+          FR-12: Die Hoerzeit zaehlt in Medienzeit. Bei 2x laeuft der
+          Streaming-Zaehler doppelt so schnell hoch — es wird in derselben
+          Wanduhrzeit doppelt so viel Inhalt gehoert, nicht mehr pro Minute
+          Inhalt gezahlt (FR-24, NR-06).
+        */}
+        <select
+          name="playback-rate"
+          aria-label="Abspielgeschwindigkeit"
+          value={String(rate)}
+          onChange={(event) => setRate(Number((event.target as HTMLSelectElement).value))}
+        >
+          {PLAYBACK_RATES.map((option) => (
+            <option key={option} value={String(option)}>
+              {formatRate(option)}
+            </option>
+          ))}
+        </select>
       </div>
       <input
         type="range"

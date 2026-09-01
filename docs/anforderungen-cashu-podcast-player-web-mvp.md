@@ -65,7 +65,7 @@
 
 | ID | Anforderung |
 |---|---|
-| FR-12 | Die App spielt die Enclosure-URL über ein `<audio>`-Element ab und unterstützt Play, Pause, Sprung +30 s und −15 s sowie Scrubbing über eine Fortschrittsleiste. |
+| FR-12 | Die App spielt die Enclosure-URL über ein `<audio>`-Element ab und unterstützt Play, Pause, Sprung +30 s und −15 s, Scrubbing über eine Fortschrittsleiste sowie die Wahl der **Abspielgeschwindigkeit** aus den Stufen 0,8× · 1× · 1,2× · 1,5× · 1,8× · 2× · 2,1× (Vorgabe 1×). Die gewählte Stufe gilt über einen Episodenwechsel hinweg weiter. Die Hörzeit zählt weiterhin in Medienzeit: Bei 2× läuft der Streaming-Zähler in derselben Wanduhrzeit doppelt so schnell hoch, weil doppelt so viel Inhalt gehört wird — der Satz pro Minute Inhalt bleibt unverändert (FR-24, NR-06). Ergänzt am 01.09.2026. |
 | FR-13 | Die Wiedergabe läuft weiter, wenn der Tab in den Hintergrund wechselt oder das Fenster den Fokus verliert; Titel, Cover und Play/Pause werden über die Media Session API an die Systemsteuerung gemeldet. |
 | FR-14 | Die Hörposition wird pro Episode mindestens alle 10 s persistiert und beim erneuten Öffnen wiederhergestellt. |
 
