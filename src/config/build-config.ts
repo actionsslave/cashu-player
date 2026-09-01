@@ -8,14 +8,25 @@
 export const PLACEHOLDER_MARKER = 'PLATZHALTER';
 
 /**
- * Erlaubte Mints (FR-15, NR-07). Jeder Eintrag muss vor dem Bau einzeln auf
- * CORS-Tauglichkeit aus dem Browser geprüft werden — siehe A-02 und docs/manuelle-tests.md.
- * TODO: echte Mint-URLs eintragen (mit NUT-11 und NUT-12, ohne Fees, A-05).
+ * Erlaubte Mints (FR-15, NR-07).
+ *
+ * Aktuell nur der oeffentliche Testmint: Seine Tokens sind wertlos, also kann
+ * in der Entwicklung niemand echte Betraege verlieren. Geprueft am 01.09.2026
+ * ueber /v1/info und /v1/keysets: NUT-11 ja, NUT-12 ja,
+ * Access-Control-Allow-Origin `*`, aktives sat-Keyset mit input_fee_ppk 100.
+ *
+ * Zwei offene Punkte vor der Demo:
+ *   - A-05 verlangt einen Reserve-Mint. Hier steht einer. Kandidaten mit
+ *     Belegen stehen in docs/kandidaten.md; Minibits ist der einzige
+ *     geprueft gebuehrenfreie mit vollstaendigem CORS.
+ *   - 100 ppk sind nicht fee-frei. Bei 10 Sat pro Minute faellt das kaum ins
+ *     Gewicht, widerspricht aber A-05.
+ *
+ * CORS ist eine Eigenschaft des Paares aus Origin und Mint: Die Pruefung oben
+ * lief von der Kommandozeile, nicht aus dem Browser unter der Demo-Origin.
+ * A-02 ueber /pruefung/a02-mints.html bleibt Pflicht.
  */
-export const ALLOWED_MINTS: readonly string[] = [
-  `https://mint-1.${PLACEHOLDER_MARKER}.example`,
-  `https://mint-2.${PLACEHOLDER_MARKER}.example`,
-];
+export const ALLOWED_MINTS: readonly string[] = ['https://testnut.cashu.space'];
 
 /**
  * Relays für das Nachschlagen von kind:10019 (FR-22).
@@ -24,23 +35,25 @@ export const ALLOWED_MINTS: readonly string[] = [
  * TODO: echte Demo-Relays eintragen.
  */
 export const DEMO_RELAYS: readonly string[] = [
-  `wss://relay-1.${PLACEHOLDER_MARKER}.example`,
-  `wss://relay-2.${PLACEHOLDER_MARKER}.example`,
+  'wss://relay.damus.io',
+  'wss://relay.primal.net',
+  'wss://nos.lol',
 ];
 
 /**
  * Feed-Proxy für den zweiten Abrufversuch bei fehlenden CORS-Headern (FR-08).
  * Ausschließlich für RSS-Abrufe; niemals für Mint- oder Relay-Verkehr (NR-03).
  * Die Feed-URL wird an diesen Präfix angehängt (url-encoded).
- * TODO: echte Proxy-URL eintragen.
+ *
+ * Leer heisst: kein Proxy. fetchFeed() ueberspringt den Zweitversuch dann und
+ * meldet den urspruenglichen Netzfehler. Das ist der Rueckfall aus OQ-03 —
+ * fuer die Demo Feeds waehlen, die CORS bereits setzen. Ein oeffentlicher
+ * Dienst saehe mit, welche Feeds gelesen werden, und kann waehrend der Demo
+ * ausfallen; ein eigener Proxy braucht die Origin aus OQ-08.
+ *
+ * Sobald eine Adresse feststeht, hier eintragen — sonst aendert sich nichts.
  */
-export const FEED_PROXY_URL = `https://proxy.${PLACEHOLDER_MARKER}.example/rss?url=`;
-
-/**
- * npub des Demo-Podcasts, als Rückfallebene, wenn der Feed keine nostr-Identität
- * trägt (A-04). TODO: echten Demo-npub eintragen.
- */
-export const DEMO_NPUB = `npub1${PLACEHOLDER_MARKER.toLowerCase()}`;
+export const FEED_PROXY_URL: string = '';
 
 /** Streaming-Satz: Vorgabe, Grenzen (FR-26). */
 export const STREAMING_RATE_DEFAULT_SATS_PER_MINUTE = 10;
@@ -82,6 +95,6 @@ export const SUGGESTED_EXTENSIONS: readonly { name: string; url: string }[] = [
 
 /** True, solange irgendein Wert oben noch ein Platzhalter ist. */
 export function hasPlaceholders(): boolean {
-  const values = [...ALLOWED_MINTS, ...DEMO_RELAYS, FEED_PROXY_URL, DEMO_NPUB];
+  const values = [...ALLOWED_MINTS, ...DEMO_RELAYS, FEED_PROXY_URL];
   return values.some((value) => value.toLowerCase().includes(PLACEHOLDER_MARKER.toLowerCase()));
 }

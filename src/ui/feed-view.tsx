@@ -17,6 +17,8 @@ import {
 export interface FeedViewProps {
   /** Nur für Tests; im Betrieb der fetch des Browsers. */
   fetchImpl?: typeof fetch;
+  /** Nur für Tests; im Betrieb FEED_PROXY_URL aus der Build-Konfiguration. */
+  proxyUrl?: string;
   onEpisodeSelected?: (episode: EpisodeRecord, subscription: SubscriptionSummary) => void;
 }
 
@@ -35,7 +37,7 @@ function describeError(error: unknown): string {
   return 'Der Feed konnte nicht geladen werden.';
 }
 
-export function FeedView({ fetchImpl, onEpisodeSelected }: FeedViewProps) {
+export function FeedView({ fetchImpl, proxyUrl, onEpisodeSelected }: FeedViewProps) {
   const [url, setUrl] = useState('');
   const [subscriptions, setSubscriptions] = useState<SubscriptionSummary[]>([]);
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
@@ -67,7 +69,7 @@ export function FeedView({ fetchImpl, onEpisodeSelected }: FeedViewProps) {
     setError(undefined);
     try {
       // US-02-AC-4: liegt das Abo schon vor, springt die Ansicht dorthin.
-      const subscription = await subscribe(url, { fetchImpl });
+      const subscription = await subscribe(url, { fetchImpl, proxyUrl });
       setUrl('');
       await reload(subscription.id);
     } catch (cause) {
@@ -78,7 +80,7 @@ export function FeedView({ fetchImpl, onEpisodeSelected }: FeedViewProps) {
   async function handleRefresh(id: string) {
     setError(undefined);
     try {
-      await refreshSubscription(id, { fetchImpl });
+      await refreshSubscription(id, { fetchImpl, proxyUrl });
       await reload(id);
     } catch (cause) {
       // FR-11: der letzte Stand bleibt stehen, nur der Hinweis kommt dazu.

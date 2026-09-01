@@ -27,6 +27,12 @@ export interface FeedResponse {
 
 export interface FetchFeedOptions {
   fetchImpl?: typeof fetch;
+  /**
+   * Ziel des Zweitversuchs. Vorgabe ist `FEED_PROXY_URL`; ein leerer Wert
+   * schaltet den Proxy ab (OQ-03). Explizit setzbar, damit die Tests beide
+   * Zustaende pruefen koennen, ohne an der Build-Konstante zu haengen.
+   */
+  proxyUrl?: string;
 }
 
 interface Attempt {
@@ -68,6 +74,7 @@ async function attempt(url: string, fetchImpl: typeof fetch): Promise<Attempt> {
 
 export async function fetchFeed(url: string, options: FetchFeedOptions = {}): Promise<FeedResponse> {
   const fetchImpl = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
+  const proxyUrl = options.proxyUrl ?? FEED_PROXY_URL;
 
   const direct = await attempt(url, fetchImpl);
   if (direct.xml !== undefined) return { xml: direct.xml, viaProxy: false };
@@ -78,7 +85,12 @@ export async function fetchFeed(url: string, options: FetchFeedOptions = {}): Pr
   // Timeout die Wartezeit verdoppeln (FR-11).
   if (direct.error?.reason !== 'netz') throw direct.error;
 
-  const viaProxy = await attempt(`${FEED_PROXY_URL}${encodeURIComponent(url)}`, fetchImpl);
+  // OQ-03: Ohne konfigurierten Proxy gibt es kein Ziel. Der Zweitversuch wuerde
+  // sonst die nackte Feed-URL relativ zur eigenen Origin abrufen und mit einem
+  // irrefuehrenden Grund scheitern.
+  if (proxyUrl === '') throw direct.error;
+
+  const viaProxy = await attempt(`${proxyUrl}${encodeURIComponent(url)}`, fetchImpl);
   if (viaProxy.xml !== undefined) return { xml: viaProxy.xml, viaProxy: true };
 
   throw direct.error ?? viaProxy.error;

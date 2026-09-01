@@ -80,7 +80,10 @@ describe('FR-08: Proxy-Kennzeichnung', () => {
       .mockRejectedValueOnce(new TypeError('Failed to fetch'))
       .mockResolvedValueOnce(new Response(VOLLSTAENDIGER_FEED, { status: 200 }));
 
-    render(<FeedView fetchImpl={fetchImpl} />, host);
+    // Proxy explizit, weil FEED_PROXY_URL im Build leer ist (OQ-03) und es
+    // ohne Ziel keinen Zweitversuch gaebe. Geprueft wird die Kennzeichnung,
+    // nicht die Auslieferungsentscheidung.
+    render(<FeedView fetchImpl={fetchImpl} proxyUrl="https://proxy.example/rss?url=" />, host);
     await flush();
     await addFeed();
 

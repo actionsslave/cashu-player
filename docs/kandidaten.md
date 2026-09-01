@@ -1,7 +1,10 @@
 # Kandidaten für die Build-Konstanten
 
-> **Status: Vorschlagsliste, keine Entscheidung.** Die Platzhalter in
-> `src/config/build-config.ts` sind unangetastet — die Auswahl triffst du.
+> **Status: Vorschlagsliste. Eine Zwischenentscheidung ist gefallen.**
+> Am 01.09.2026 steht `ALLOWED_MINTS` auf `https://testnut.cashu.space` —
+> bewusst der Testmint, damit in der Entwicklung niemand echte Betraege
+> riskiert. Fuer die Demo bleibt die Auswahl unten offen: **A-05 verlangt zwei
+> Mints**, und der Testmint gehoert nicht auf die Buehne.
 
 Erhebungsdatum: 2026-09-01. Gegengeprüft am selben Tag. Alle Werte stammen aus **lesenden** HTTP-GETs,
 die live gegen die Endpunkte gelaufen sind. Keine Quotes, keine Swaps,
@@ -133,7 +136,8 @@ Wenn ihr eine Testkonstante braucht, ist das der Kandidat.
 
 ## Was du entscheiden musst
 
-1. **Mint-Auswahl.** Minibits steht fest; beim zweiten die Wahl zwischen
+1. **Mint-Auswahl fuer die Demo.** Aktuell laeuft nur der Testmint.
+   Minibits steht als erster Kandidat fest; beim zweiten die Wahl zwischen
    21Mint (gebuehrenfrei, offene CORS-Frage) und WesternBTC oder Coinos
    (100 ppk, CORS geklaert). Dazu die Kriterien, die ich nicht erheben kann:
    Vertrauen, Jurisdiktion, Betreiber-Identitaet.

@@ -47,14 +47,23 @@ mit echten Betraegen — nicht erst vor der Demo.
 | GitHub Pages | ihr ohnehin auf GitHub seid | Custom Domain plus „Enforce HTTPS"; `_headers` wirkt **nicht**, Caching bleibt beim Standard |
 | Eigener Server (nginx, Caddy) | die Podcast-Domain schon bei euch liegt | Header selbst setzen, siehe unten |
 
-**3. Die Build-Konstanten.** `src/config/build-config.ts` enthaelt noch
-Platzhalter fuer Mints, Relays, Feed-Proxy und Demo-npub. Die App zeigt das zur
-Laufzeit als Warnung an (`hasPlaceholders()`), aber Zahlungen funktionieren
-damit nicht. Kandidaten stehen in [`kandidaten.md`](kandidaten.md); die Auswahl
-triffst du. **Jeder Mint muss vor dem Bau einzeln auf CORS-Tauglichkeit
-geprueft werden** — dafuer ist `/pruefung/a02-mints.html` da, und sie muss
-unter derselben Origin wie die Demo laufen, sonst sagt das Ergebnis nichts
-ueber CORS aus (A-02).
+**3. Die Build-Konstanten.** Seit 01.09.2026 gesetzt: `ALLOWED_MINTS` auf
+`https://testnut.cashu.space`, `DEMO_RELAYS` auf damus, primal und nos.lol,
+`FEED_PROXY_URL` leer (OQ-03), `DEMO_NPUB` entfernt. `hasPlaceholders()`
+liefert `false`, die Warnung im UI ist weg.
+
+**Fuer die Demo reicht das nicht.** Zwei Punkte stehen offen:
+
+- **A-05 ist unerfuellt.** Es steht ein Mint in der Liste, verlangt sind zwei.
+  Faellt der Testmint aus, ist die Demo tot. Kandidaten mit Belegen stehen in
+  [`kandidaten.md`](kandidaten.md).
+- **Der Testmint ist ein Testmint.** Seine Tokens sind wertlos — richtig fuer
+  die Entwicklung, falsch fuer eine Buehne, auf der echtes Ecash fliessen soll.
+  Und mit 100 ppk ist er nicht fee-frei, was A-05 ebenfalls fordert.
+
+**Jeder Mint muss vor dem Bau einzeln auf CORS-Tauglichkeit geprueft werden** —
+dafuer ist `/pruefung/a02-mints.html` da, und sie muss unter derselben Origin
+wie die Demo laufen, sonst sagt das Ergebnis nichts ueber CORS aus (A-02).
 
 **4. Eine Content-Security-Policy — oder bewusst keine.** Eine CSP mit
 `connect-src` waere die technische Durchsetzung von NR-02 (keine fremden

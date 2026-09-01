@@ -30,14 +30,14 @@ angefasst. Alle Aussagen unten beziehen sich auf Quelltext und Testlauf.
 | FR-05 | umgesetzt | `src/payments/capability.ts` → `paymentCapability()` | `test/payments/capability.test.ts` | `canSubscribe`/`canPlay` sind konstant true |
 | FR-06 | umgesetzt | `src/identity/session.ts` → `logout()`; Dialog `src/ui/identity-bar.tsx:88` | `test/ui/identity-bar.test.tsx` | Dialog nennt ausdruecklich, dass die Wallet bleibt |
 | FR-07 | umgesetzt | `src/feed/subscriptions.ts` → `subscribe()`; `src/feed/parse.ts` → `parseFeed()` | `test/feed/subscriptions.test.ts`, `test/feed/parse.test.ts` | iTunes- und Podcast-Namespace inkl. `podcast:txt`, `podcast:value`, `valueRecipient` |
-| FR-08 | Code vorhanden, ungeprueft | `src/feed/fetch.ts:81` → Proxy-Zweitversuch | `test/feed/fetch.test.ts` | Proxy nur bei `reason === 'netz'`; HTTP-Fehler und Timeout loesen ihn bewusst nicht aus. `FEED_PROXY_URL` ist noch Platzhalter |
+| FR-08 | Code vorhanden, ungeprueft | `src/feed/fetch.ts` → Proxy-Zweitversuch | `test/feed/fetch.test.ts` | Proxy nur bei `reason === 'netz'`; HTTP-Fehler und Timeout loesen ihn bewusst nicht aus. `FEED_PROXY_URL` ist **leer** (OQ-03): der Zweitversuch wird uebersprungen, FR-08 ist damit codeseitig da, aber ohne Ziel |
 | FR-09 | umgesetzt | `src/feed/subscriptions.ts` → `listSubscriptions()`, `unsubscribe()` | `test/feed/subscriptions.test.ts`, `test/ui/feed-view.test.tsx` | Abbestellen loescht Episoden in derselben Transaktion |
 | FR-10 | umgesetzt | `src/feed/parse.ts:148` (`EPISODES_PER_FEED`); `listEpisodes()` | `test/feed/parse.test.ts`, `test/feed/subscriptions.test.ts` | 50 Episoden, absteigend nach Datum |
 | FR-11 | umgesetzt | `src/feed/fetch.ts` (`FEED_TIMEOUT_MS`); `refreshSubscription()` | `test/feed/fetch.test.ts` | Bei Fehler bleibt der letzte Stand, `feed-view.tsx:83` faengt ab |
 | FR-12 | umgesetzt | `src/ui/player.tsx` → `start`, `halt`, `skip`, `scrubTo` | `test/ui/player.test.tsx` | +30 s / −15 s, Fortschrittsleiste |
 | FR-13 | Code vorhanden, ungeprueft | `src/player/media-session.ts` | `test/player/media-session.test.ts` | Ob das Betriebssystem Titel und Cover wirklich anzeigt und die Medientaste durchkommt, sagt kein jsdom-Test |
 | FR-14 | umgesetzt | `src/player/position-store.ts` → `PositionPersister`, `loadPosition()` | `test/player/position-store.test.ts` | `POSITION_PERSIST_INTERVAL_MS` = 10 s |
-| FR-15 | Code vorhanden, ungeprueft | `src/wallet/local-wallet.ts` → `LocalWallet.balance()` | `test/wallet/local-wallet.test.ts` | Gegen einen echten Mint ungetestet; `ALLOWED_MINTS` ist Platzhalter |
+| FR-15 | Code vorhanden, ungeprueft | `src/wallet/local-wallet.ts` → `LocalWallet.balance()` | `test/wallet/local-wallet.test.ts` | Gegen einen echten Mint ungetestet. `ALLOWED_MINTS` steht seit 01.09.2026 auf `testnut.cashu.space` — **ein** Mint, A-05 verlangt zwei |
 | FR-16 | Code vorhanden, ungeprueft | `local-wallet.ts` → `exportTokens()`; `src/ui/qr-code.tsx` | `test/wallet/export.test.ts`, `test/ui/qr-code.test.tsx` | Der eigentliche Test ist die **Einloesung in einer fremden Wallet** — das kann nur ein Mensch |
 | FR-17 | Code vorhanden, ungeprueft | `local-wallet.ts` → `importToken()`; `TokenImportError` | `test/wallet/import.test.ts` | Vier benannte Fehlergruende inkl. „bereits eingeloest" (NUT-07) |
 | FR-18 | Code vorhanden, ungeprueft | `src/wallet/persistence.ts` → `ensurePersistentStorage()` | `test/wallet/persistence.test.ts` | Chrome entscheidet heuristisch; beide Ergebnisse gueltig |
@@ -128,15 +128,12 @@ geaendert** — der Auftrag erlaubte im Anforderungs-Dokument nur die Aenderung
 an FR-29. Vorschlag: US-06-AC-4 um das Wort „unerreichbar" praezisieren und ein
 US-06-AC-6 fuer den Restfall ergaenzen.
 
-**3. `DEMO_NPUB` ist tote Konfiguration.** `src/config/build-config.ts:43`
-deklariert die Konstante als Rueckfallebene fuer A-04 („wenn der Feed keine
-nostr-Identitaet traegt"). Verwendet wird sie nirgends ausser in
-`hasPlaceholders()`. `resolvePaymentTarget()` liefert bei fehlendem npub
-`no-npub` und greift nicht darauf zurueck. Das entspricht FR-23 und OQ-01
-(„fuer den MVP: gar nicht") — also ist eher die Konstante ueberfluessig als der
-Code falsch. **Nicht geaendert**, weil die Datei laut Auftrag unangetastet
-bleibt. Entweder sie faellt weg, oder A-04 bekommt seine Rueckfallebene
-tatsaechlich.
+**3. `DEMO_NPUB` war tote Konfiguration — entfernt.** Die Konstante war als
+Rueckfallebene fuer A-04 deklariert, wurde aber nirgends ausser in
+`hasPlaceholders()` verwendet: `resolvePaymentTarget()` liefert bei fehlendem
+npub `no-npub` und greift nicht darauf zurueck. Das entspricht FR-23 und OQ-01
+(„fuer den MVP: gar nicht"), also war die Konstante ueberfluessig, nicht der
+Code falsch. Auf Entscheidung vom 01.09.2026 entfernt. **Erledigt.**
 
 **4. Der „Guardrails-Scanner" ist kein eigener Aufruf.** Der Auftrag nennt vier
 Gates: `npm test`, `npm run build`, `npm run lint` und den Guardrails-Scanner.
@@ -146,6 +143,21 @@ ueber `test/guardrails/`, ist also in `npm test` enthalten. Es gibt kein
 eigenen, benannten Schritt vor den uebrigen Tests aus, damit ein Verstoss
 sichtbar bleibt. Kein Widerspruch im Code, nur eine Erwartung, die ins Leere
 gegriffen haette.
+
+## Stand der Build-Konfiguration
+
+Am 01.09.2026 gesetzt, nachdem die Entscheidungen gefallen sind:
+
+| Konstante | Wert | Bemerkung |
+|---|---|---|
+| `ALLOWED_MINTS` | `https://testnut.cashu.space` | Testmint, Tokens wertlos. Am 01.09.2026 geprueft: NUT-11 ja, NUT-12 ja, CORS `*`, aktives sat-Keyset 100 ppk. **A-05 offen** — der Reserve-Mint fehlt, und 100 ppk sind nicht fee-frei |
+| `DEMO_RELAYS` | `relay.damus.io`, `relay.primal.net`, `nos.lol` | Nur fuer das Nachschlagen von kind:10019. Nutzaps gehen an die Relays aus dem kind:10019 des Empfaengers (FR-27, NR-02). Alle drei am 01.09.2026 per NIP-11 erreichbar, ohne AUTH, ohne Zahlung |
+| `FEED_PROXY_URL` | leer | OQ-03, Rueckfall „Feeds waehlen, die CORS bereits setzen". `fetchFeed()` ueberspringt den Zweitversuch bei leerem Wert |
+| `DEMO_NPUB` | entfernt | War nirgends verwendet, siehe Abweichung 3 |
+
+`hasPlaceholders()` liefert damit `false`, die Warnung im UI ist weg. Das
+heisst **nicht**, dass die Konfiguration demo-fertig ist: Der Testmint ist eine
+Entwicklungsentscheidung, kein Demo-Mint, und A-05 ist unerfuellt.
 
 ## Blockiert
 

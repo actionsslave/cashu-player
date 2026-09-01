@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { FEED_PROXY_URL } from '../../src/config/build-config.js';
 import { FeedFetchError, fetchFeed } from '../../src/feed/fetch.js';
 
 const XML = '<rss version="2.0"><channel><title>T</title></channel></rss>';
+
+/** Proxy wird injiziert, damit die Tests nicht an der Build-Konstante haengen. */
+const PROXY = 'https://proxy.example/rss?url=';
 
 const ok = (body: string) => new Response(body, { status: 200 });
 const corsFehler = () => Promise.reject(new TypeError('Failed to fetch'));
@@ -18,7 +20,7 @@ describe('FR-08: Proxy-Fallback bei CORS', () => {
       .mockImplementationOnce(corsFehler)
       .mockResolvedValueOnce(ok(XML));
 
-    const result = await fetchFeed('https://feed.example/rss', { fetchImpl });
+    const result = await fetchFeed('https://feed.example/rss', { fetchImpl, proxyUrl: PROXY });
 
     expect(result.xml).toBe(XML);
     expect(result.viaProxy).toBe(true);
@@ -31,16 +33,16 @@ describe('FR-08: Proxy-Fallback bei CORS', () => {
       .mockImplementationOnce(corsFehler)
       .mockResolvedValueOnce(ok(XML));
 
-    await fetchFeed('https://feed.example/rss?x=1', { fetchImpl });
+    await fetchFeed('https://feed.example/rss?x=1', { fetchImpl, proxyUrl: PROXY });
 
     expect(fetchImpl.mock.calls[1][0]).toBe(
-      `${FEED_PROXY_URL}${encodeURIComponent('https://feed.example/rss?x=1')}`,
+      `${PROXY}${encodeURIComponent('https://feed.example/rss?x=1')}`,
     );
   });
 
   it('fragt den Proxy nicht an, wenn der direkte Abruf gelingt', async () => {
     const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(ok(XML));
-    const result = await fetchFeed('https://feed.example/rss', { fetchImpl });
+    const result = await fetchFeed('https://feed.example/rss', { fetchImpl, proxyUrl: PROXY });
 
     expect(result.viaProxy).toBe(false);
     expect(fetchImpl).toHaveBeenCalledTimes(1);
@@ -48,10 +50,30 @@ describe('FR-08: Proxy-Fallback bei CORS', () => {
 
   it('versucht den Proxy genau einmal', async () => {
     const fetchImpl = vi.fn<typeof fetch>().mockImplementation(corsFehler);
-    await expect(fetchFeed('https://feed.example/rss', { fetchImpl })).rejects.toBeInstanceOf(
-      FeedFetchError,
-    );
+    await expect(
+      fetchFeed('https://feed.example/rss', { fetchImpl, proxyUrl: PROXY }),
+    ).rejects.toBeInstanceOf(FeedFetchError);
     expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it('OQ-03: ohne konfigurierten Proxy bleibt es beim einen Versuch', async () => {
+    const fetchImpl = vi.fn<typeof fetch>().mockImplementation(corsFehler);
+
+    await expect(
+      fetchFeed('https://feed.example/rss', { fetchImpl, proxyUrl: '' }),
+    ).rejects.toMatchObject({ reason: 'netz' });
+
+    // Ohne Ziel waere der Zweitversuch ein Abruf auf die nackte Feed-URL
+    // relativ zur eigenen Origin — ein Fehlschlag mit irrefuehrendem Grund.
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('OQ-03: ein gelungener Direktabruf ist ohne Proxy unveraendert nicht viaProxy', async () => {
+    const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(ok(XML));
+    const result = await fetchFeed('https://feed.example/rss', { fetchImpl, proxyUrl: '' });
+
+    expect(result).toMatchObject({ xml: XML, viaProxy: false });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -101,7 +123,9 @@ describe('FR-11: Fehler und Timeout', () => {
 
   it('meldet einen Netzfehler, wenn auch der Proxy scheitert', async () => {
     const fetchImpl = vi.fn<typeof fetch>().mockImplementation(corsFehler);
-    await expect(fetchFeed('https://feed.example/rss', { fetchImpl })).rejects.toMatchObject({
+    await expect(
+      fetchFeed('https://feed.example/rss', { fetchImpl, proxyUrl: PROXY }),
+    ).rejects.toMatchObject({
       reason: 'netz',
     });
   });

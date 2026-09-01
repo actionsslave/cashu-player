@@ -63,7 +63,11 @@ describe('FR-07: Feed per URL hinzufügen', () => {
       .mockRejectedValueOnce(new TypeError('Failed to fetch'))
       .mockResolvedValueOnce(new Response(VOLLSTAENDIGER_FEED, { status: 200 }));
 
-    const subscription = await subscribe(URL_A, { fetchImpl });
+    // Proxy explizit, weil FEED_PROXY_URL im Build leer ist (OQ-03).
+    const subscription = await subscribe(URL_A, {
+      fetchImpl,
+      proxyUrl: 'https://proxy.example/rss?url=',
+    });
     expect(subscription.loadedViaProxy).toBe(true);
   });
 });
