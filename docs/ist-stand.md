@@ -167,6 +167,27 @@ sondern weil ich die Grenze nicht anfasse.
 Die GitHub-Action prueft nur; der Deploy-Job kommt dazu, wenn die Entscheidung
 gefallen ist. Siehe [`deployment.md`](deployment.md).
 
+**Die CI-Action liegt lokal, aber nicht auf GitHub.** `.github/workflows/ci.yml`
+ist geschrieben, das YAML ist gegen einen Parser gepruefte gueltige Syntax, und
+der Commit liegt auf `main` — aber der Push wird abgewiesen:
+
+```
+refusing to allow an OAuth App to create or update workflow
+`.github/workflows/ci.yml` without `workflow` scope
+```
+
+Der angemeldete Token hat die Scopes `gist`, `read:org` und `repo`; fuer Dateien
+unter `.github/workflows/` braucht es zusaetzlich `workflow`. Einen Token mit
+weiteren Rechten auszustellen ist deine Entscheidung, nicht meine. Der Weg:
+
+```bash
+gh auth refresh -h github.com -s workflow
+git push origin main
+```
+
+Bis dahin laufen die vier Gates nur lokal. Alle uebrigen Commits dieser Runde
+sind auf `main` gepusht.
+
 ## npm audit
 
 Ausgefuehrt am 2026-09-01 nach `npm ci`:
