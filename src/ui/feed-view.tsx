@@ -2,6 +2,7 @@
  * Abos und Episoden (FR-07 bis FR-11, FR-21).
  */
 import { useCallback, useEffect, useState } from 'preact/hooks';
+import { EPISODES_VISIBLE } from '../config/build-config.js';
 import type { EpisodeRecord } from '../db/database.js';
 import { FeedFetchError } from '../feed/fetch.js';
 import { FeedParseError } from '../feed/parse.js';
@@ -163,14 +164,15 @@ export function FeedView({ fetchImpl, proxyUrl, onEpisodeSelected }: FeedViewPro
             </p>
           )}
           {/*
-            FR-10: bewusst nur der Titel. Datum, Dauer und Beschreibung stehen
+            FR-10: die neuesten EPISODES_VISIBLE Episoden, je Episode bewusst
+            nur der Titel. Datum, Dauer und Beschreibung stehen
             weiterhin am EpisodeRecord und werden beim Parsen gespeichert — sie
             sind hier nur nicht sichtbar, weil die Beschreibungen der Feeds die
             Liste unlesbar machen. Der Titel waehlt die Episode aus; die
             Wiedergabe uebernimmt der Player.
           */}
           <ul class="episodes">
-            {episodes.map((episode) => (
+            {episodes.slice(0, EPISODES_VISIBLE).map((episode) => (
               <li key={episode.id}>
                 <button
                   type="button"

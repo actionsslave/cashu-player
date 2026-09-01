@@ -4,7 +4,8 @@ import { closeDatabase } from '../../src/db/database.js';
 import { FeedView } from '../../src/ui/feed-view.js';
 import { resetDatabase } from '../helpers/db.js';
 import { clickButton, flush } from '../helpers/ui.js';
-import { FEED_OHNE_NOSTR, VOLLSTAENDIGER_FEED } from '../feed/fixtures.js';
+import { EPISODES_VISIBLE } from '../../src/config/build-config.js';
+import { FEED_OHNE_NOSTR, VOLLSTAENDIGER_FEED, feedMitEpisoden } from '../feed/fixtures.js';
 
 const URL_A = 'https://feed.example/rss';
 
@@ -125,10 +126,21 @@ describe('FR-10: Episodenliste', () => {
     expect(episodes).not.toContain('Die zweite Folge');
   });
 
+  it('zeigt hoechstens EPISODES_VISIBLE Episoden', async () => {
+    // Der Feed traegt 70 Episoden, gespeichert werden 50 (EPISODES_PER_FEED),
+    // sichtbar sind EPISODES_VISIBLE.
+    await mount(serve(feedMitEpisoden(70)));
+    await addFeed();
+
+    expect(host.querySelectorAll('.episodes li')).toHaveLength(EPISODES_VISIBLE);
+  });
+
   it('US-02-AC-1: haelt die Reihenfolge absteigend nach Datum', async () => {
     await mount(serve(VOLLSTAENDIGER_FEED));
     await addFeed();
 
+    // Zwei Episoden, weniger als EPISODES_VISIBLE — der Schnitt greift nicht,
+    // die Reihenfolge ist trotzdem die neueste zuerst.
     const titles = [...host.querySelectorAll('.episodes button')].map((b) => b.textContent);
     expect(titles).toEqual(['Folge 2', 'Folge 1']);
   });

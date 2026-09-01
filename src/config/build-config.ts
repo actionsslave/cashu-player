@@ -81,8 +81,16 @@ export const FEED_TIMEOUT_MS = 10_000;
 /** Timeout für Signaturanfragen an die Extension in Millisekunden (FR-03). */
 export const SIGN_TIMEOUT_MS = 30_000;
 
-/** Anzahl Episoden je Feed (FR-10). */
+/** Anzahl Episoden, die je Feed geladen und gespeichert werden (FR-10). */
 export const EPISODES_PER_FEED = 50;
+
+/**
+ * Anzahl Episoden, die in der Liste sichtbar sind (FR-10).
+ *
+ * Bewusst getrennt von EPISODES_PER_FEED: Gespeichert bleiben 50, damit eine
+ * groessere Zahl hier kein erneutes Laden aller Feeds erzwingt.
+ */
+export const EPISODES_VISIBLE = 3;
 
 /** Persistenzintervall der Hörposition in Millisekunden (FR-14). */
 export const POSITION_PERSIST_INTERVAL_MS = 10_000;
