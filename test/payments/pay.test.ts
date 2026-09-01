@@ -4,7 +4,7 @@ import { InsufficientFundsError, type ResolvedPaymentTarget } from '../../src/co
 import { LocalWallet } from '../../src/wallet/local-wallet.js';
 import { MintUnreachableError } from '../../src/wallet/mint-gateway.js';
 import { NoRelayError } from '../../src/payments/nostr-gateway.js';
-import { sendNutzap } from '../../src/payments/pay.js';
+import { retryPendingNutzaps, sendNutzap } from '../../src/payments/pay.js';
 import { listHistory } from '../../src/wallet/history.js';
 import { resetDatabase } from '../helpers/db.js';
 import { MINT_A, seedProofs } from '../helpers/proofs.js';
@@ -194,5 +194,71 @@ describe('FR-29: Abbruch nach dem Mint-Swap', () => {
 
     // 64 Sat eingesetzt, 10 Sat gelockt, 54 Sat Wechselgeld zurück.
     await expect(d.wallet.balance()).resolves.toBe(54);
+  });
+});
+
+describe('FR-29 (Restfall): erneuter Publish-Versuch aus der Warteschlange', () => {
+  /** Bringt eine Zahlung in den Zustand nach dem Swap, aber ohne Relay-Bestaetigung. */
+  async function nachDemSwapOhneOk() {
+    await seedProofs([64]);
+    const wallet = new LocalWallet();
+    const result = await sendNutzap(
+      { target: TARGET, amount: 10, kind: 'boost' },
+      deps({ wallet, nostr: fakeNostr({ acceptedBy: [] }) }),
+    );
+    expect(result.status).toBe('ausstehend');
+    return { wallet, historyId: result.historyId };
+  }
+
+  it('publiziert erneut und meldet den Verlaufseintrag als gesendet', async () => {
+    await nachDemSwapOhneOk();
+    const nostr = fakeNostr();
+
+    await expect(retryPendingNutzaps({ nostr })).resolves.toBe(1);
+
+    expect(nostr.published).toHaveLength(1);
+    expect(nostr.published[0].kind).toBe(9321);
+    expect((await listHistory())[0]).toMatchObject({ status: 'gesendet' });
+  });
+
+  it('leert die Warteschlange erst nach der Bestaetigung', async () => {
+    await nachDemSwapOhneOk();
+    const db = await openDatabase();
+    expect(await db.getAll('pendingNutzaps')).toHaveLength(1);
+
+    await retryPendingNutzaps({ nostr: fakeNostr() });
+
+    expect(await db.getAll('pendingNutzaps')).toHaveLength(0);
+  });
+
+  it('behaelt den Eintrag und zaehlt die Versuche, solange kein Relay bestaetigt', async () => {
+    await nachDemSwapOhneOk();
+
+    await expect(retryPendingNutzaps({ nostr: fakeNostr({ acceptedBy: [] }) })).resolves.toBe(0);
+
+    const db = await openDatabase();
+    const [pending] = await db.getAll('pendingNutzaps');
+    expect(pending.attempts).toBe(2);
+    expect((await listHistory())[0]).toMatchObject({ status: 'ausstehend' });
+  });
+
+  it('gibt kein Guthaben zurueck — die Proofs gehoeren dem Empfaenger', async () => {
+    const { wallet } = await nachDemSwapOhneOk();
+
+    await retryPendingNutzaps({ nostr: fakeNostr({ acceptedBy: [] }) });
+    await expect(wallet.balance()).resolves.toBe(54);
+
+    await retryPendingNutzaps({ nostr: fakeNostr() });
+    await expect(wallet.balance()).resolves.toBe(54);
+  });
+
+  it('sendet an die Relays des Empfaengers, nicht an eine eigene Liste (NR-02)', async () => {
+    await nachDemSwapOhneOk();
+    const nostr = fakeNostr();
+    const publish = vi.spyOn(nostr, 'publish');
+
+    await retryPendingNutzaps({ nostr });
+
+    expect(publish.mock.calls[0][0]).toEqual(TARGET.relays);
   });
 });
