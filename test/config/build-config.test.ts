@@ -37,18 +37,25 @@ describe('Build-Konstanten', () => {
     expect(hasPlaceholders()).toBe(false);
   });
 
-  it('A-05: zwei Mints, damit einer ausfallen darf', () => {
-    expect(ALLOWED_MINTS).toHaveLength(2);
+  it('A-05: mehr als ein Mint, damit einer ausfallen darf', () => {
+    expect(ALLOWED_MINTS.length).toBeGreaterThan(1);
   });
 
-  it('fuehrt genau die beiden entschiedenen Testmints', () => {
+  it('fuehrt genau die entschiedenen Mints', () => {
     // Erinnerung, kein Qualitaetsmerkmal: Wird die Liste geaendert, wird diese
     // Zeile rot und die Begruendung gehoert nach docs/kandidaten.md.
     // testnut.cashu.exchange kann kein NUT-12 (DLEQ) — bewusst in Kauf
     // genommen, siehe dort.
     expect([...ALLOWED_MINTS]).toEqual([
+      'https://mint.minibits.cash/Bitcoin',
+      'https://mint.macadamia.cash',
       'https://testnut.cashu.exchange',
       'https://testnut.cashu.space',
     ]);
+  });
+
+  it('NR-07: kein Eintrag doppelt, auch nicht in anderer Schreibweise', () => {
+    const normalisiert = ALLOWED_MINTS.map((mint) => mint.toLowerCase().replace(/\/+$/, ''));
+    expect(new Set(normalisiert).size).toBe(ALLOWED_MINTS.length);
   });
 });

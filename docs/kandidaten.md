@@ -1,13 +1,25 @@
 # Kandidaten für die Build-Konstanten
 
-> **Status: Vorschlagsliste. Zwei Zwischenentscheidungen sind gefallen.**
-> `ALLOWED_MINTS` fuehrt seit 02.09.2026 zwei Testmints:
-> `https://testnut.cashu.exchange` und `https://testnut.cashu.space` — beide
-> mit wertlosen Tokens, damit in der Entwicklung niemand echte Betraege
-> riskiert. **Fuer die Demo taugt das nicht**: Testmints gehoeren nicht auf die
-> Buehne, und `cashu.exchange` kann kein NUT-12. Die Auswahl unten bleibt offen.
+> **Status: entschieden.** `ALLOWED_MINTS` fuehrt seit 02.09.2026 vier Mints:
+> `mint.minibits.cash/Bitcoin` und `mint.macadamia.cash` fuer echtes Geld,
+> `testnut.cashu.exchange` und `testnut.cashu.space` fuer die Entwicklung.
+> A-05 ist damit erfuellt — mehrere Mints mit NUT-11 und NUT-12. Einzige
+> Luecke: `cashu.exchange` ohne DLEQ, bewusst in Kauf genommen.
 
-## Nachtrag 02.09.2026 — die beiden Testmints im Vergleich
+## Nachtrag 02.09.2026 — die vier eingetragenen Mints
+
+| Mint | Software | NUT-11 | NUT-12 | Fee (aktiv, sat) | CORS |
+|---|---|---|---|---|---|
+| `mint.minibits.cash/Bitcoin` | cdk-mintd 0.17.6 | ja | ja | **0 ppk** | `*` |
+| `mint.macadamia.cash` | Nutshell 0.20.3 | ja | ja | 150 ppk | `*` |
+| `testnut.cashu.exchange` | Nutshell-CF 0.0.1 | ja | **nein** | 10 ppk | `*` |
+| `testnut.cashu.space` | cdk-mintd 0.17.0-rc.3 | ja | ja | 100 ppk | `*` |
+
+Minibits liegt unter dem Pfad `/Bitcoin`; die nackte Domain antwortet mit 404.
+`mint.madacamia.cash` existiert nicht — die richtige Schreibweise ist
+*macadamia*.
+
+### Die beiden Testmints im Vergleich
 
 | | `testnut.cashu.exchange` | `testnut.cashu.space` |
 |---|---|---|
