@@ -1,6 +1,6 @@
 import { render } from 'preact';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { BoostDialog } from '../../src/ui/boost-dialog.js';
+import { NutzapDialog } from '../../src/ui/nutzap-dialog.js';
 import { BOOST_PRESETS_SATS } from '../../src/config/build-config.js';
 import { clickButton, flush } from '../helpers/ui.js';
 
@@ -11,7 +11,7 @@ const onCancel = vi.fn();
 
 async function mount(props: Record<string, unknown> = {}) {
   render(
-    <BoostDialog
+    <NutzapDialog
       balance={5000}
       positionSeconds={847}
       onSend={onSend}
@@ -61,7 +61,7 @@ afterEach(() => {
 describe('FR-28: Boost mit Betrag und Nachricht', () => {
   it('bietet genau die konfigurierten Vorgabebetraege an', async () => {
     await mount({ balance: 50_000 });
-    const labels = [...host.querySelectorAll('.boost-presets button')].map((b) =>
+    const labels = [...host.querySelectorAll('.chip-row button')].map((b) =>
       b.textContent?.trim(),
     );
     expect(labels).toEqual(BOOST_PRESETS_SATS.map((p) => p.toLocaleString('de-DE')));
@@ -69,7 +69,7 @@ describe('FR-28: Boost mit Betrag und Nachricht', () => {
 
   it('US-06-AC-2: sperrt Vorgaben oberhalb des Guthabens', async () => {
     await mount({ balance: 300 });
-    const buttons = [...host.querySelectorAll('.boost-presets button')] as HTMLButtonElement[];
+    const buttons = [...host.querySelectorAll('.chip-row button')] as HTMLButtonElement[];
     // 210 ist bezahlbar, 2 100 / 4 200 / 21 000 nicht.
     expect(buttons.map((b) => b.disabled)).toEqual([false, true, true, true]);
   });
@@ -123,9 +123,10 @@ describe('US-06-AC-2: zu wenig Guthaben', () => {
     expect(sendButton()?.disabled).toBe(true);
   });
 
-  it('zeigt das verfügbare Guthaben', async () => {
+  it('zeigt, was nach dem Senden bleibt', async () => {
+    // Entwurf 4b nennt statt des Guthabens den Rest: "Verbleibend: 12.005 Sat".
     await mount({ balance: 500 });
-    expect(host.textContent).toContain('500 Sat');
+    expect(host.textContent).toContain('Verbleibend: 290 Sat');
   });
 
   it('lässt einen Betrag genau in Höhe des Guthabens zu', async () => {
@@ -157,7 +158,7 @@ describe('Laufende Wiedergabe darf die Eingabe nicht stoeren', () => {
    *  das, was das timeupdate des Audio-Elements viermal pro Sekunde ausloest. */
   async function tickWhilePlaying(positionSeconds: number) {
     render(
-      <BoostDialog
+      <NutzapDialog
         balance={5000}
         positionSeconds={positionSeconds}
         onSend={onSend}

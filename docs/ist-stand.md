@@ -261,6 +261,54 @@ Bei einem bereits komprimierten Schluessel entstuende sonst ein ungueltiger
 Wert. Ein mit `03` beginnender Schluessel bliebe unbehandelt — ohne echten
 Empfaenger nicht pruefbar.
 
+## Podcast-Nav-Handoff (03.09.2026)
+
+`design_handoff_podcast_nav/` ist umgesetzt: Turn 4 (4a Wallet, 4b Nutzap
+senden und Gesendet), Turn 3 (3a Vollbild-Player) und 2a (Shows, Episoden,
+Show-Seite, Suche). 2b war ausdruecklich nicht gewaehlt und bleibt ungebaut.
+
+Neu: `src/ui/library-view.tsx` (2a als Hook mit drei Slots),
+`src/ui/wallet-view.tsx` (4a), `src/ui/nutzap-dialog.tsx` (4b),
+`src/ui/icons.tsx`, `src/player/progress.ts`, `src/wallet/mint-overview.ts`.
+`chrome.tsx` ist zu einem generischen `Frame` geworden. Abgeloest und geloescht:
+`wallet-panel.tsx` und `boost-dialog.tsx` samt Tests — ihre Anforderungen
+werden von den Nachfolgern getestet, dead code mit gruenen Tests waere
+irrefuehrend.
+
+**Icons.** Der Handoff verlangt Phosphor Duotone. `@phosphor-icons/web` wiegt
+entpackt 46 MB und braeuchte eine Schriftdatei zur Laufzeit. Stattdessen
+liegen die 18 genannten Glyphen als Pfaddaten in `src/ui/icons.tsx` (7,4 kB,
+aus phosphor-icons/core, MIT). Keine Laufzeit-Abhaengigkeit, kein CDN-Abruf,
+kein Datenabfluss (NR-05, NR-08).
+
+**Abweichungen vom Handoff, bewusst:**
+
+| Punkt | Handoff | Umgesetzt | Grund |
+|---|---|---|---|
+| Warnung zum Browser-Speicher | 4a zeigt sie nicht | ergaenzt, unter dem Guthaben | FR-16 verlangt sie ausdruecklich. Eine Muss-Anforderung faellt nicht weg, weil ein Entwurf sie nicht zeigt. |
+| Speichermodus | in 4a nicht vorgesehen | als Tag neben dem Guthaben | FR-18 verlangt die Anzeige des Ergebnisses von `navigator.storage.persist()`. |
+| Akzeptierte Mints | 4a zeigt nur Mints mit Guthaben | beides: akzeptierte Mints unter „Aufladen", Guthaben-Mints in der Tabelle | Am 02.09.2026 ausdruecklich bestellt. Die Tabelle beantwortet eine andere Frage als die Liste. |
+| Eingabe fuer neue Feeds | in 2a nicht vorgesehen | unter der Ueberschrift „Abos" | Ohne sie liesse sich nichts abonnieren (FR-07). |
+| Aktualisieren und Abbestellen | nur ein Dreipunkt-Knopf angedeutet | Menue hinter dem Dreipunkt-Knopf | FR-09 und FR-11. Ohne sie waere die Umsetzung eine Regression. |
+| „Mint hinzufuegen" | Knopf in 4a | weggelassen | NR-07: Es duerfen nur Mints aus `ALLOWED_MINTS` verwendet werden. Ein Knopf, der zur Laufzeit Mints aufnimmt, waere ein Bruch dieser Anforderung. |
+| „Standard zum Senden" | Suffix an einem Mint | weggelassen | Das Konzept gibt es nicht: `sendNutzap` waehlt den Mint pro Zahlung aus dem `kind:10019` des Empfaengers. |
+| Aufteilung ueber mehrere Empfaenger | mehrere Zeilen mit Rollen | eine Zeile, der Podcast | Kapitel 3.1 schliesst Splits aus, OQ-05 legt einen Empfaenger je Podcast fest. Die Rechnung des Entwurfs ist trotzdem implementiert: `payableTotal()` summiert nur zahlbare Anteile, der Knopf traegt diese Summe. |
+| Kapitel, Transkript, Sleep-Timer, Download, Warteschlange | in 3a vorgesehen | weggelassen | Kapitel 3.1: „Kapitel, Transkripte, Playlists" und „Download und Offline-Wiedergabe" sind nicht im Scope. Es gibt keine Daten dafuer. |
+| Episodenzahl je Feed | 2a zeigt eine flache Liste aller Folgen | uebernommen | Damit greift `EPISODES_VISIBLE` in der Bibliothek nicht mehr. FR-10 ist entsprechend nachgezogen. |
+| „Token exportiert" im Verlauf | eine der drei Arten | Zeile erscheint nie | Die App schreibt beim Export keinen Verlaufseintrag, weil ein Export dort keine Proofs entfernt. Siehe offener Punkt unten. |
+
+**Offener Punkt.** Entwurf 4a beschreibt den Export als endgueltig („verlaesst
+diese Wallet endgueltig"). `exportTokens()` kodiert die Proofs nur, es loescht
+sie nicht — das Guthaben bleibt danach unveraendert. Beides gleichzeitig geht
+nicht: Entweder der Export bucht ab, dann braucht er einen Verlaufseintrag und
+eine Bestaetigung, oder er bleibt eine Sicherungskopie. **Nicht entschieden,
+nicht geaendert** — ein Export, der Guthaben loescht, ist keine Aenderung, die
+nebenbei passieren darf.
+
+**Nicht geprueft:** die Darstellung unter 1120 px Breite, und der
+Nutzap-Dialog gegen einen echten Empfaenger — der Testbrowser hat keine
+NIP-07-Extension.
+
 ## Blockiert
 
 **A-01 und A-02 kann ich nicht abnehmen.** Beide verlangen einen Browser mit

@@ -23,6 +23,14 @@ export interface FeedViewProps {
   proxyUrl?: string;
   /** Episode, die gerade läuft — im Entwurf fett und in Textfarbe. */
   playingEpisodeId?: string;
+  /**
+   * Nur die Eingabe für neue Feeds rendern. Abos und Episoden zeigt seit dem
+   * Podcast-Nav-Handoff die Bibliothek (2a); die Eingabe hat dort keinen
+   * eigenen Platz, wird aber fuer FR-07 gebraucht.
+   */
+  compact?: boolean;
+  /** Meldet dem Aufrufer, dass sich Abos oder Episoden geaendert haben. */
+  onChanged?: () => void;
   onEpisodeSelected?: (episode: EpisodeRecord, subscription: SubscriptionSummary) => void;
 }
 
@@ -36,6 +44,8 @@ export function FeedView({
   fetchImpl,
   proxyUrl,
   playingEpisodeId,
+  compact,
+  onChanged,
   onEpisodeSelected,
 }: FeedViewProps) {
   const [url, setUrl] = useState('');
@@ -59,7 +69,8 @@ export function FeedView({
     // Beides in einem Zug, damit nie eine Abo-Liste ohne ihre Episoden steht.
     setSubscriptions(list);
     setEpisodes(byFeed);
-  }, []);
+    onChanged?.();
+  }, [onChanged]);
 
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
@@ -117,6 +128,15 @@ export function FeedView({
       </button>
     </div>
   );
+
+  if (compact) {
+    return (
+      <>
+        {addFeed}
+        {error && <p class="wallet-error">{error}</p>}
+      </>
+    );
+  }
 
   // 3d — leere Bibliothek. Kein Transport, keine Session-Spalte, keine Illustration.
   if (subscriptions.length === 0) {

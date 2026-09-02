@@ -1,14 +1,23 @@
 import { render } from 'preact';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { Chrome, type Route } from './ui/chrome.js';
+import { Frame, RouteLinks, type Route } from './ui/chrome.js';
 import { IdentityControl, IdentityNotices, useIdentity } from './ui/identity-bar.js';
 import { InstallButton } from './ui/install-button.js';
 import { FeedView } from './ui/feed-view.js';
+import { useLibrary } from './ui/library-view.js';
 import { Player } from './ui/player.js';
-import { SessionColumn, isLowBalance } from './ui/session-column.js';
-import { WalletPanel } from './ui/wallet-panel.js';
+import {
+  listEpisodes,
+  listSubscriptions,
+  refreshSubscription,
+  unsubscribe,
+  type SubscriptionSummary,
+} from './feed/subscriptions.js';
+import { loadPosition } from './player/position-store.js';
+import { Icon } from './ui/icons.js';
+import { WalletView } from './ui/wallet-view.js';
 import { SettingsView } from './ui/settings-view.js';
-import { BoostDialog } from './ui/boost-dialog.js';
+import { NutzapDialog } from './ui/nutzap-dialog.js';
 import { paymentCapability } from './payments/capability.js';
 import { resolvePaymentTarget } from './payments/resolve-target.js';
 import { sendNutzap, retryPendingNutzaps } from './payments/pay.js';
@@ -24,7 +33,7 @@ import { LocalWallet } from './wallet/local-wallet.js';
 import { CashuMintGateway } from './wallet/cashu-mint-gateway.js';
 import { readStorageMode, type StorageMode } from './wallet/persistence.js';
 import { registerServiceWorker } from './pwa/register.js';
-import { hasPlaceholders } from './config/build-config.js';
+import { hasPlaceholders, publicMints } from './config/build-config.js';
 import type { PaymentTarget, ListeningTick } from './contracts/index.js';
 import type { StreamingState } from './payments/streaming.js';
 import type { Session } from './identity/session.js';
@@ -60,6 +69,10 @@ function App() {
   const [boosting, setBoosting] = useState(false);
   const [feedback, setFeedback] = useState<string | undefined>(undefined);
   const [storageMode, setStorageMode] = useState<StorageMode | undefined>(undefined);
+  const [expanded, setExpanded] = useState(false);
+  const [subscriptions, setSubscriptions] = useState<SubscriptionSummary[]>([]);
+  const [episodesByFeed, setEpisodesByFeed] = useState<Record<string, EpisodeRecord[]>>({});
+  const [positions, setPositions] = useState<Map<string, number>>(new Map());
 
   const identity = useIdentity(setSession);
   const mintGateway = useMemo(() => new CashuMintGateway(), []);
@@ -146,6 +159,33 @@ function App() {
     };
   }
 
+  /** Abos, Episoden und Hoerpositionen fuer die Bibliothek (2a). */
+  const reloadLibrary = useCallback(async () => {
+    const liste = await listSubscriptions();
+    const listen = await Promise.all(liste.map((abo) => listEpisodes(abo.id)));
+
+    const byFeed: Record<string, EpisodeRecord[]> = {};
+    liste.forEach((abo, index) => {
+      byFeed[abo.id] = listen[index];
+    });
+
+    const alle = listen.flat();
+    const gespeichert = await Promise.all(alle.map((episode) => loadPosition(episode.id)));
+    const map = new Map<string, number>();
+    alle.forEach((episode, index) => {
+      const wert = gespeichert[index];
+      if (wert !== undefined) map.set(episode.id, wert);
+    });
+
+    setSubscriptions(liste);
+    setEpisodesByFeed(byFeed);
+    setPositions(map);
+  }, []);
+
+  useEffect(() => {
+    void reloadLibrary();
+  }, [reloadLibrary]);
+
   const handleTick = useCallback((tick: ListeningTick) => {
     setPosition(tick.positionSeconds);
     void controller.current?.handleTick(tick);
@@ -186,101 +226,149 @@ function App() {
   // NR-06: ohne Bestätigung des Satzes wird nichts gesendet. Gefragt wird erst,
   // wenn Zahlungen überhaupt möglich sind — sonst wäre die Frage sinnlos.
   const askForRate = capability.canStream && !rateConfirmed;
-  const low = isLowBalance(balance, rate);
   const streamingNote = !session
     ? 'nur hören'
     : capability.canStream
       ? `streamt ${rate} Sat/min`
       : 'streamt nicht';
 
+  // Der Entwurf zeigt in 2a keine Eingabe fuer neue Feeds. Ohne sie liesse sich
+  // nichts abonnieren (FR-07), deshalb steht sie unter der Ueberschrift.
+  const addFeed = (
+    <FeedView
+      compact
+      playingEpisodeId={nowPlaying?.episode.id}
+      onChanged={() => void reloadLibrary()}
+    />
+  );
+
+  const library = useLibrary({
+    subscriptions,
+    addFeed,
+    episodes: episodesByFeed,
+    positions,
+    playingEpisodeId: nowPlaying?.episode.id,
+    onPlay: (episode, subscription, expand) => {
+      setNowPlaying({
+        episode,
+        podcastTitle: subscription.title,
+        artworkUrl: subscription.imageUrl,
+        npub: subscription.npub,
+        podcastGuid: subscription.podcastGuid,
+      });
+      setExpanded(expand);
+    },
+    onRefresh: async (id) => {
+      await refreshSubscription(id);
+      await reloadLibrary();
+    },
+    onUnsubscribe: async (id) => {
+      await unsubscribe(id);
+      await reloadLibrary();
+    },
+  });
+
+  const walletHead = (
+    <div class="top-row">
+      <span class="wordmark" style={{ fontSize: '24px' }}>
+        Cashu Player
+      </span>
+      <span class="spacer" />
+      <RouteLinks route={route} onRoute={setRoute} />
+      <span class="spacer" />
+      <IdentityControl identity={identity} />
+    </div>
+  );
+
+  const kopf =
+    route === 'listen' && expanded ? (
+      <div class="top-row">
+        <button
+          type="button"
+          class="btn btn-ghost btn-icon"
+          aria-label="Vollbild schließen"
+          onClick={() => setExpanded(false)}
+        >
+          <Icon name="caret-down" size={20} />
+        </button>
+        <span class="kicker">Läuft gerade</span>
+        <span class="spacer" />
+        <RouteLinks route={route} onRoute={setRoute} />
+      </div>
+    ) : route === 'listen' ? (
+      <>
+        {library.head}
+        <div class="top-row" style={{ marginTop: '8px' }}>
+          <RouteLinks route={route} onRoute={setRoute} />
+          <span class="spacer" />
+          <IdentityControl identity={identity} />
+        </div>
+      </>
+    ) : (
+      walletHead
+    );
+
+  const datumsleiste =
+    route === 'listen' && expanded ? (
+      <>
+        <span>{nowPlaying?.podcastTitle}</span>
+        <span>{nowPlaying?.episode.title}</span>
+        <span>{streamingNote}</span>
+      </>
+    ) : route === 'listen' ? (
+      library.dateline
+    ) : route === 'wallet' ? (
+      <>
+        <span>{`${publicMints().length} Mints`}</span>
+        <span>Nur auf diesem Gerät gespeichert</span>
+        <span>npub dient der Identität, nicht der Verwahrung</span>
+      </>
+    ) : undefined;
+
   return (
-    <>
-      <Chrome
-        route={route}
-        onRoute={setRoute}
-        balance={route === 'wallet' ? undefined : balance}
-        lowBalance={low}
-      >
-        <IdentityControl identity={identity} />
-      </Chrome>
+    <div class="nav-page">
+      <Frame head={kopf} dateline={datumsleiste}>
+        {hasPlaceholders() && (
+          <p class="config-warning">
+            Konfiguration unvollständig: In src/config/build-config.ts stehen noch Platzhalter.
+          </p>
+        )}
+        <IdentityNotices identity={identity} />
 
-      {hasPlaceholders() && (
-        <p class="config-warning">
-          Konfiguration unvollständig: In src/config/build-config.ts stehen noch Platzhalter für
-          Mints, Relays oder Feed-Proxy.
-        </p>
-      )}
-      <IdentityNotices identity={identity} />
-
-      {route === 'listen' && (
-        <>
-          {nowPlaying && (
-            <div class="now-playing">
-              {nowPlaying.artworkUrl ? (
-                <img
-                  class="cover halftone"
-                  src={nowPlaying.artworkUrl}
-                  alt=""
-                  width={196}
-                  height={196}
-                />
-              ) : (
-                <span class="cover art-placeholder">Cover</span>
-              )}
-              <Player
-                episode={nowPlaying.episode}
-                podcastTitle={nowPlaying.podcastTitle}
-                artworkUrl={nowPlaying.artworkUrl}
-                streamingNote={streamingNote}
-                canBoost={capability.canBoost}
-                onBoost={() => setBoosting(true)}
-                onTick={handleTick}
-                onPositionChange={setPosition}
-              />
-              <SessionColumn
-                loggedIn={Boolean(session)}
-                balance={balance}
-                streaming={streaming}
-                blockedReason={
-                  target && target.status !== 'resolved' ? target.message : undefined
-                }
-                ratePerMinute={rate}
-                positionSeconds={position}
-                onSignIn={() => void identity.signIn()}
-                onGoToWallet={() => setRoute('wallet')}
-              />
+        {route === 'listen' && !expanded && library.body}
+        {route === 'wallet' && <WalletView wallet={wallet} onBalanceChange={setBalance} />}
+        {route === 'settings' && (
+          <>
+            <SettingsView
+              rate={rate}
+              rateConfirmed={rateConfirmed}
+              storageMode={storageMode}
+              onConfirmRate={handleConfirmRate}
+            />
+            <div class="install-row">
+              <InstallButton />
             </div>
-          )}
-          {feedback && <p class="notice">{feedback}</p>}
-          <FeedView
-            playingEpisodeId={nowPlaying?.episode.id}
-            onEpisodeSelected={(episode, subscription) =>
-              setNowPlaying({
-                episode,
-                podcastTitle: subscription.title,
-                artworkUrl: subscription.imageUrl,
-                npub: subscription.npub,
-                podcastGuid: subscription.podcastGuid,
-              })
-            }
-          />
-        </>
-      )}
+          </>
+        )}
+        {feedback && <p class="notice">{feedback}</p>}
+      </Frame>
 
-      {route === 'wallet' && <WalletPanel wallet={wallet} onBalanceChange={setBalance} />}
-
-      {route === 'settings' && (
-        <>
-          <SettingsView
-            rate={rate}
-            rateConfirmed={rateConfirmed}
-            storageMode={storageMode}
-            onConfirmRate={handleConfirmRate}
-          />
-          <div class="install-row">
-            <InstallButton />
-          </div>
-        </>
+      {/* Der Streifen bleibt montiert: das Audio-Element haengt daran und darf
+          beim Umschalten auf Vollbild nicht neu starten. */}
+      {route === 'listen' && nowPlaying && (
+        <Player
+          episode={nowPlaying.episode}
+          podcastTitle={nowPlaying.podcastTitle}
+          artworkUrl={nowPlaying.artworkUrl}
+          expanded={expanded}
+          onToggleExpand={() => setExpanded((v) => !v)}
+          streamingNote={capability.canStream ? streamingNote : undefined}
+          sentSats={streaming.sentSats}
+          canBoost={capability.canBoost}
+          onBoost={() => setBoosting(true)}
+          onTick={handleTick}
+          onPositionChange={setPosition}
+        />
       )}
 
       {askForRate && (
@@ -289,8 +377,8 @@ function App() {
             <p class="dialog-title">Streaming-Satz bestätigen</p>
             <p>
               Beim Hören wird laufend gezahlt. Bitte den Satz bestätigen — er gilt für alle
-              Podcasts. Die Freigabe in der nostr-Extension muss <strong>dauerhaft</strong>{' '}
-              erteilt werden.
+              Podcasts. Die Freigabe in der nostr-Extension muss <strong>dauerhaft</strong> erteilt
+              werden.
             </p>
             <SettingsRatePrompt rate={rate} onConfirm={handleConfirmRate} />
           </div>
@@ -298,7 +386,7 @@ function App() {
       )}
 
       {boosting && (
-        <BoostDialog
+        <NutzapDialog
           balance={balance}
           positionSeconds={position}
           podcastTitle={nowPlaying?.podcastTitle}
@@ -307,9 +395,10 @@ function App() {
           onCancel={() => setBoosting(false)}
         />
       )}
-    </>
+    </div>
   );
 }
+
 
 /** Der Satz-Dialog aus US-05-AC-6, mit eigenem Entwurfswert. */
 function SettingsRatePrompt({

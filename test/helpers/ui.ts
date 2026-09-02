@@ -33,3 +33,16 @@ export async function clickButton(host: HTMLElement, label: string): Promise<voi
   button.click();
   await flush();
 }
+
+/** Klickt einen Knopf ueber sein aria-label — Icon-Knoepfe tragen keinen Text. */
+export async function clickLabel(host: HTMLElement, label: string): Promise<void> {
+  const button = host.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`);
+  if (!button) {
+    const vorhanden = [...host.querySelectorAll('button[aria-label]')]
+      .map((b) => b.getAttribute('aria-label'))
+      .join(', ');
+    throw new Error(`Knopf mit aria-label "${label}" nicht gefunden. Vorhanden: ${vorhanden}`);
+  }
+  button.click();
+  await flush();
+}

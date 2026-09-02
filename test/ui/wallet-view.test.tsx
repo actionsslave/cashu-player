@@ -2,7 +2,7 @@ import { render } from 'preact';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { closeDatabase } from '../../src/db/database.js';
 import { LocalWallet } from '../../src/wallet/local-wallet.js';
-import { WalletPanel } from '../../src/ui/wallet-panel.js';
+import { WalletView } from '../../src/ui/wallet-view.js';
 import { resetDatabase } from '../helpers/db.js';
 import { clickButton, flush } from '../helpers/ui.js';
 import { encodeToken, fakeGateway, freshProofs } from '../helpers/mint.js';
@@ -14,7 +14,7 @@ const FREMD = 'https://fremder-mint.example';
 let host: HTMLDivElement;
 
 function mount(wallet: LocalWallet) {
-  render(<WalletPanel wallet={wallet} />, host);
+  render(<WalletView wallet={wallet} />, host);
   return flush();
 }
 
@@ -53,8 +53,8 @@ describe('FR-15: Guthaben anzeigen', () => {
     await seedProofs([500]);
     await mount(makeWallet());
     // Entwurf 1d: die Zahl ist die Seite, "Sat" steht als eigener Block daneben.
-    expect(host.querySelector('.balance-amount')?.textContent).toBe('500');
-    expect(host.querySelector('.balance-unit')?.textContent).toContain('Sat');
+    expect(host.querySelector('.balance .amount')?.textContent).toBe('500');
+    expect(host.querySelector('.balance .unit')?.textContent).toBe('Sat');
   });
 });
 
@@ -68,7 +68,7 @@ describe('FR-16: Sicherung', () => {
   it('US-04-AC-3: zeigt beim Export einen Cashu-Token als Text', async () => {
     await seedProofs([500]);
     await mount(makeWallet());
-    await clickButton(host, 'Guthaben exportieren');
+    await clickButton(host, 'Token erzeugen');
     const output = host.querySelector('.export-token')?.textContent ?? '';
     expect(output.startsWith('cashu')).toBe(true);
   });
@@ -76,7 +76,7 @@ describe('FR-16: Sicherung', () => {
   it('US-04-AC-3: zeigt denselben Token zusätzlich als QR-Code', async () => {
     await seedProofs([500]);
     await mount(makeWallet());
-    await clickButton(host, 'Guthaben exportieren');
+    await clickButton(host, 'Token erzeugen');
     expect(host.querySelector('svg.qr')).not.toBeNull();
   });
 });
@@ -86,7 +86,8 @@ describe('FR-17: Aufladen', () => {
     await mount(makeWallet());
     await typeToken(encodeToken(ERLAUBT, [500]));
     await clickButton(host, 'Aufladen');
-    expect(host.textContent).toContain('500 Sat');
+    // Entwurf 4a setzt die Zahl gross und die Einheit als eigenen Block daneben.
+    expect(host.querySelector('.balance .amount')?.textContent).toBe('500');
   });
 
   it('US-04-AC-4: nennt den Mint, der nicht in der erlaubten Liste steht', async () => {
@@ -128,11 +129,12 @@ describe('FR-19: Verlauf', () => {
     await mount(makeWallet());
     await typeToken(encodeToken(ERLAUBT, [500]));
     await clickButton(host, 'Aufladen');
-    const history = host.querySelector('.history-block')?.textContent ?? '';
+    const history = host.querySelector('.history-table')?.textContent ?? '';
     expect(history).toContain('500');
     // FR-19: Richtung, Art und Status stehen als eigene Spalten in der Tabelle.
     expect(history).toContain('+500 Sat');
-    expect(history).toContain('Aufladung');
+    // Entwurf 4a kennt genau drei Arten; ein Import heisst dort "Aufgeladen".
+    expect(history).toContain('Aufgeladen');
   });
 });
 

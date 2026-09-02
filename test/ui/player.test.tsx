@@ -4,7 +4,7 @@ import { closeDatabase, type EpisodeRecord } from '../../src/db/database.js';
 import { Player } from '../../src/ui/player.js';
 import { savePosition } from '../../src/player/position-store.js';
 import { resetDatabase } from '../helpers/db.js';
-import { clickButton, flush } from '../helpers/ui.js';
+import { clickLabel, flush } from '../helpers/ui.js';
 import { PLAYBACK_RATES, PLAYBACK_RATE_DEFAULT } from '../../src/config/build-config.js';
 
 const EPISODE: EpisodeRecord = {
@@ -23,8 +23,13 @@ let pause: ReturnType<typeof vi.fn>;
 
 const audioEl = () => host.querySelector('audio') as HTMLAudioElement;
 
+/**
+ * Die Bedienelemente stehen im Vollbild (Entwurf 3a); der Streifen zeigt eine
+ * verkuerzte Auswahl. Die Tests mounten deshalb das Vollbild, sofern nicht
+ * ausdruecklich anders verlangt.
+ */
 async function mount(props: Record<string, unknown> = {}) {
-  render(<Player episode={EPISODE} podcastTitle="Testpodcast" {...props} />, host);
+  render(<Player episode={EPISODE} podcastTitle="Testpodcast" expanded {...props} />, host);
   await flush();
 }
 
@@ -56,31 +61,31 @@ describe('FR-12: Wiedergabe und Navigation', () => {
 
   it('startet und pausiert die Wiedergabe', async () => {
     await mount();
-    await clickButton(host, 'Abspielen');
+    await clickLabel(host, 'Abspielen');
     expect(play).toHaveBeenCalledTimes(1);
 
-    await clickButton(host, 'Pause');
+    await clickLabel(host, 'Pause');
     expect(pause).toHaveBeenCalledTimes(1);
   });
 
   it('springt 30 s vorwärts', async () => {
     await mount();
     audioEl().currentTime = 100;
-    await clickButton(host, '+30');
+    await clickLabel(host, '+30 s');
     expect(audioEl().currentTime).toBe(130);
   });
 
   it('springt 15 s zurück', async () => {
     await mount();
     audioEl().currentTime = 100;
-    await clickButton(host, '−15');
+    await clickLabel(host, '−15 s');
     expect(audioEl().currentTime).toBe(85);
   });
 
   it('springt nicht vor den Anfang', async () => {
     await mount();
     audioEl().currentTime = 5;
-    await clickButton(host, '−15');
+    await clickLabel(host, '−15 s');
     expect(audioEl().currentTime).toBe(0);
   });
 

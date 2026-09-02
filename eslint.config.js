@@ -8,7 +8,7 @@ export default tseslint.config(
     // Handoff sagt ausdruecklich: die HTML-Prototypen und support.js sind
     // Referenz und gehen nicht in die App. Sie halten die Regeln der App
     // deshalb auch nicht ein.
-    ignores: ['dist', 'node_modules', 'coverage', 'design_handoff_cashu_player'],
+    ignores: ['dist', 'node_modules', 'coverage', 'design_handoff_cashu_player', 'design_handoff_podcast_nav'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
