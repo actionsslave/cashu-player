@@ -26,11 +26,22 @@ export function parseNutzapConfig(event: SignedNostrEvent): NutzapConfigRecord |
   // Ohne P2PK-Pubkey wäre der Token für jeden ausgebbar — dann lieber gar nicht.
   if (!p2pkPubkey) return undefined;
 
+  // NIP-61: `[ "mint", "<url>", "usd", "sat" ]` — ab Position 2 stehen die
+  // unterstuetzten Basiseinheiten. Ohne Marker bleibt der Mint ohne Eintrag;
+  // die Spezifikation nennt sie "additional markers", Schweigen ist keine Absage.
+  const units: Record<string, string[]> = {};
+  for (const tag of event.tags) {
+    if (tag[0] !== 'mint' || !tag[1]) continue;
+    const marker = tag.slice(2).filter(Boolean);
+    if (marker.length > 0) units[tag[1]] = marker;
+  }
+
   return {
     pubkeyHex: event.pubkey,
     p2pkPubkey,
     mints: tagValues(event, 'mint'),
     relays: tagValues(event, 'relay'),
+    units,
     fetchedAt: 0,
   };
 }

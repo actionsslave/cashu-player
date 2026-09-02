@@ -234,6 +234,33 @@ irgendwo sonst:
 Beides ist **nicht implementiert und nicht geplant** — es sind Fragen, keine
 Aufgaben.
 
+## NIP-61-Audit vom 02.09.2026
+
+Der Sendepfad wurde gegen die Spezifikation geprueft (nur Sendeseite; Empfangen
+und Einloesen sind laut Kapitel 3.1 nicht im Scope). Konform waren:
+Event-Struktur, ein `proof`-Tag je Proof, `02`-Praefix beim P2PK-Lock, `u`
+exakt in der Schreibweise des `kind:10019`, `p` als Identitaets-Pubkey, Mint
+ausschliesslich aus dem `kind:10019`, Zustellung nur an dessen Relays, und die
+Replaceable-Natur des `kind:10019` (nostr-tools sortiert nach `created_at`).
+
+Drei Abweichungen auf `SHOULD`-Ebene wurden gefunden und behoben:
+
+| Befund | Betriebsfolge | Behoben in |
+|---|---|---|
+| Keine Laufzeitpruefung auf NUT-11 vor dem P2PK-Lock | Bei einem Mint ohne NUT-11 waere der Nutzap fuer jeden ausgebbar, der das Event liest — lautlos, ohne Fehler | `mint-gateway.ts:assertCanLockP2PK`, aufgerufen in `cashu-mint-gateway.ts:send` |
+| Mint-URLs nicht normalisiert (Final Consideration 2) | Zwei Toepfe fuer denselben Mint, `InsufficientFundsError` trotz ausreichendem Guthaben | `local-wallet.ts:normalizeMint`, in `addProofs`, `reserve`, `exportTokens` |
+| Unit-Marker der `mint`-Tags ignoriert | Sat-Proofs an einen nur fuer usd gelisteten Mint; der Empfaenger saehe sie womoeglich nie | `nutzap-config.ts:parseNutzapConfig`, Filter in `resolve-target.ts`, neuer Grund `no-common-unit` |
+
+**Nicht behoben, weil nicht feststellbar:** ob ein Mint NUT-11 tatsaechlich
+durchsetzt (nur die Selbstauskunft ist lesbar), ob DLEQ-Daten in einem echten
+Nutzap ankommen (der Code-Pfad erhaelt sie, kein Test-Fixture traegt `dleq`),
+und ob ein Empfaenger die Proofs einloesen kann.
+
+**Randfall zum `02`-Praefix:** `p2pkLockKey` praefixt nur bei 64 Hex-Zeichen.
+Bei einem bereits komprimierten Schluessel entstuende sonst ein ungueltiger
+Wert. Ein mit `03` beginnender Schluessel bliebe unbehandelt — ohne echten
+Empfaenger nicht pruefbar.
+
 ## Blockiert
 
 **A-01 und A-02 kann ich nicht abnehmen.** Beide verlangen einen Browser mit

@@ -109,6 +109,12 @@ export interface NutzapConfigRecord {
   p2pkPubkey: string;
   mints: string[];
   relays: string[];
+  /**
+   * NIP-61: die Marker an den `mint`-Tags, je Mint die unterstuetzten
+   * Basiseinheiten. Optional, weil gecachte Eintraege aus aelteren Fassungen
+   * sie nicht tragen — dort gilt dann, wie ohne Marker, keine Einschraenkung.
+   */
+  units?: Record<string, string[]>;
   fetchedAt: number;
 }
 

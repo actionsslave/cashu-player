@@ -4,7 +4,7 @@
  */
 import { normalizeMintUrl } from '@cashu/cashu-ts';
 import { decode } from 'nostr-tools/nip19';
-import { ALLOWED_MINTS } from '../config/build-config.js';
+import { ALLOWED_MINTS, WALLET_UNIT } from '../config/build-config.js';
 import type { PaymentTarget, PaymentTargetFailure } from '../contracts/index.js';
 import { fetchNutzapConfig } from './nutzap-config.js';
 import type { NostrGateway } from './nostr-gateway.js';
@@ -22,6 +22,7 @@ const MESSAGES: Record<PaymentTargetFailure, string> = {
     'Der Podcast hat keine Empfangs-Konfiguration veröffentlicht (kind:10019).',
   'no-common-mint':
     'Kein gemeinsamer Mint: Der Podcast nimmt nur Mints an, die nicht in der erlaubten Liste stehen.',
+  'no-common-unit': `Kein gemeinsamer Mint für ${WALLET_UNIT === 'sat' ? 'Sat' : WALLET_UNIT}: Der Podcast nimmt die gemeinsamen Mints nur in anderen Einheiten an.`,
   'lookup-failed': 'Die Empfängerdaten waren gerade nicht abrufbar.',
 };
 
@@ -80,10 +81,19 @@ export async function resolvePaymentTarget(
 
   // NR-07: nur Mints aus der Schnittmenge. Die Schreibweise bleibt die des
   // kind:10019, weil FR-27 sie exakt so in das `u`-Tag schreibt.
-  const mints = config.mints.filter((mint) =>
+  const common = config.mints.filter((mint) =>
     allowedMints.some((allowed) => sameMint(allowed, mint)),
   );
-  if (mints.length === 0) return unresolved('no-common-mint', fetchedAt, npub);
+  if (common.length === 0) return unresolved('no-common-mint', fetchedAt, npub);
+
+  // NIP-61: Die Marker am `mint`-Tag nennen die unterstuetzten Basiseinheiten.
+  // Ein Mint, der nur usd fuehrt, nimmt unsere Sat-Proofs womoeglich nie an —
+  // der Empfaenger saehe sie nicht. Ohne Marker gilt keine Einschraenkung.
+  const mints = common.filter((mint) => {
+    const units = config.units?.[mint];
+    return units === undefined || units.length === 0 || units.includes(WALLET_UNIT);
+  });
+  if (mints.length === 0) return unresolved('no-common-unit', fetchedAt, npub);
 
   return {
     status: 'resolved',

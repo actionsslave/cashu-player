@@ -11,6 +11,11 @@ export type PaymentTargetFailure =
   | 'no-nutzap-config'
   /** Keine Schnittmenge zwischen kind:10019-Mints und erlaubter Liste (US-07-AC-3). */
   | 'no-common-mint'
+  /**
+   * Gemeinsame Mints gibt es, aber keiner davon fuehrt unsere Einheit.
+   * NIP-61: die Marker an den `mint`-Tags nennen die Basiseinheiten.
+   */
+  | 'no-common-unit'
   /** Netzfehler bei der Auflösung; unterscheidbar von "dauerhaft nicht möglich". */
   | 'lookup-failed';
 

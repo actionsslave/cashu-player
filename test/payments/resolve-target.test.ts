@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { closeDatabase } from '../../src/db/database.js';
 import { resolvePaymentTarget } from '../../src/payments/resolve-target.js';
+import { MINT_A } from '../helpers/proofs.js';
 import { resetDatabase } from '../helpers/db.js';
 import {
   EMPFAENGER_HEX,
@@ -113,5 +114,58 @@ describe('FR-22: aufgelöstes Ziel', () => {
     });
 
     expect(target.status === 'resolved' && target.mints).toEqual(['https://Mint-A.example/']);
+  });
+});
+
+describe('NIP-61: nur Mints, die unsere Einheit fuehren', () => {
+  it('verwirft einen Mint, der ausschliesslich andere Einheiten fuehrt', async () => {
+    const event = kind10019({ mints: [MINT_A] });
+    event.tags = event.tags.map((tag) =>
+      tag[0] === 'mint' ? ['mint', MINT_A, 'usd'] : tag,
+    );
+
+    const target = await resolvePaymentTarget(EMPFAENGER_NPUB, {
+      gateway: fakeNostr({ event }),
+      allowedMints: [MINT_A],
+    });
+
+    expect(target).toMatchObject({ status: 'unresolved', reason: 'no-common-unit' });
+  });
+
+  it('nennt die Einheit im Grund, damit der Baustein konkret bleibt', async () => {
+    const event = kind10019({ mints: [MINT_A] });
+    event.tags = event.tags.map((tag) =>
+      tag[0] === 'mint' ? ['mint', MINT_A, 'usd'] : tag,
+    );
+
+    const target = await resolvePaymentTarget(EMPFAENGER_NPUB, {
+      gateway: fakeNostr({ event }),
+      allowedMints: [MINT_A],
+    });
+
+    expect(target.status === 'unresolved' && target.message).toContain('Sat');
+  });
+
+  it('behaelt einen Mint, der Sat neben anderen Einheiten fuehrt', async () => {
+    const event = kind10019({ mints: [MINT_A] });
+    event.tags = event.tags.map((tag) =>
+      tag[0] === 'mint' ? ['mint', MINT_A, 'usd', 'sat'] : tag,
+    );
+
+    const target = await resolvePaymentTarget(EMPFAENGER_NPUB, {
+      gateway: fakeNostr({ event }),
+      allowedMints: [MINT_A],
+    });
+
+    expect(target).toMatchObject({ status: 'resolved', mints: [MINT_A] });
+  });
+
+  it('behaelt einen Mint ohne Marker — Schweigen ist keine Absage', async () => {
+    const target = await resolvePaymentTarget(EMPFAENGER_NPUB, {
+      gateway: fakeNostr({ event: kind10019({ mints: [MINT_A] }) }),
+      allowedMints: [MINT_A],
+    });
+
+    expect(target).toMatchObject({ status: 'resolved' });
   });
 });

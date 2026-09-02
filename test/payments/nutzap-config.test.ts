@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { closeDatabase } from '../../src/db/database.js';
-import { fetchNutzapConfig } from '../../src/payments/nutzap-config.js';
+import { fetchNutzapConfig, parseNutzapConfig } from '../../src/payments/nutzap-config.js';
 import { resetDatabase } from '../helpers/db.js';
 import { EMPFAENGER_HEX, P2PK_PUBKEY, fakeNostr, kind10019 } from '../helpers/nostr.js';
 
@@ -84,5 +84,36 @@ describe('FR-22: 24-Stunden-Cache', () => {
     await fetchNutzapConfig(EMPFAENGER_HEX, { gateway, lookupRelays: RELAYS, now: () => clock });
 
     expect(gateway.fetches).toHaveLength(1);
+  });
+});
+
+describe('NIP-61: Basiseinheiten an den mint-Tags', () => {
+  it('liest die Marker als unterstuetzte Einheiten je Mint', () => {
+    const event = kind10019();
+    event.tags = [
+      ['relay', 'wss://r.example'],
+      ['mint', 'https://mint-a.example', 'usd', 'sat'],
+      ['mint', 'https://mint-b.example', 'usd'],
+      ['pubkey', P2PK_PUBKEY],
+    ];
+
+    const parsed = parseNutzapConfig(event);
+
+    expect(parsed?.mints).toEqual(['https://mint-a.example', 'https://mint-b.example']);
+    expect(parsed?.units).toEqual({
+      'https://mint-a.example': ['usd', 'sat'],
+      'https://mint-b.example': ['usd'],
+    });
+  });
+
+  it('laesst einen Mint ohne Marker ohne Eintrag', () => {
+    const event = kind10019();
+    event.tags = [
+      ['mint', 'https://mint-a.example'],
+      ['pubkey', P2PK_PUBKEY],
+    ];
+
+    // Kein Marker ist keine Absage — NIP-61 nennt sie "additional markers".
+    expect(parseNutzapConfig(event)?.units).toEqual({});
   });
 });
