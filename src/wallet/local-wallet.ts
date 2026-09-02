@@ -75,13 +75,30 @@ export interface LocalWalletOptions {
   allowedMints?: readonly string[];
 }
 
+/**
+ * Kanonische Schreibweise einer Mint-URL.
+ *
+ * NIP-61, Final Consideration 2: Clients SHOULD Mint-URLs normalisieren und
+ * deduplizieren. Ohne das entstehen zwei Toepfe fuer denselben Mint — einer
+ * unter der Schreibweise des importierten Tokens, einer unter der aus dem
+ * kind:10019 des Empfaengers, unter der das Wechselgeld landet. Ein Bundle
+ * kann nur aus einem Topf schoepfen, und die Wallet meldet zu wenig Guthaben,
+ * obwohl genug da ist.
+ *
+ * Das `u`-Tag des Nutzaps ist davon nicht betroffen: Es traegt weiterhin die
+ * Schreibweise aus dem kind:10019, wie NIP-61 es ausdruecklich verlangt.
+ */
+function normalizeMint(url: string): string {
+  try {
+    return normalizeMintUrl(url);
+  } catch {
+    return url;
+  }
+}
+
 /** Vergleicht Mint-URLs nach den Regeln von cashu-ts, nicht zeichengenau. */
 function sameMint(a: string, b: string): boolean {
-  try {
-    return normalizeMintUrl(a) === normalizeMintUrl(b);
-  } catch {
-    return a === b;
-  }
+  return normalizeMint(a) === normalizeMint(b);
 }
 
 export class LocalWallet implements WalletService {
@@ -166,13 +183,20 @@ export class LocalWallet implements WalletService {
   /** Nimmt frische Proofs eines Mints in den verfügbaren Bestand auf. */
   async addProofs(mintUrl: string, proofs: StoredProof[]): Promise<number> {
     if (proofs.length === 0) return 0;
+    const canonical = normalizeMint(mintUrl);
     const db = await openDatabase();
     const tx = db.transaction('proofs', 'readwrite');
     let added = 0;
     for (const proof of proofs) {
       const amount = Number(proof.amount);
       added += amount;
-      await tx.store.put({ secret: proof.secret, mintUrl, amount, state: 'available', proof });
+      await tx.store.put({
+        secret: proof.secret,
+        mintUrl: canonical,
+        amount,
+        state: 'available',
+        proof,
+      });
     }
     await tx.done;
     return added;
@@ -191,11 +215,15 @@ export class LocalWallet implements WalletService {
       (record) => mintUrl === undefined || sameMint(record.mintUrl, mintUrl),
     );
 
+    // Nach kanonischer URL gruppieren, nicht zeichengenau: So kommen auch
+    // Proofs mit, die vor der Normalisierung unter einer anderen Schreibweise
+    // abgelegt wurden — ohne Migration.
     const byMint = new Map<string, ProofRecord[]>();
     for (const record of available) {
-      const bucket = byMint.get(record.mintUrl) ?? [];
+      const key = normalizeMint(record.mintUrl);
+      const bucket = byMint.get(key) ?? [];
       bucket.push(record);
-      byMint.set(record.mintUrl, bucket);
+      byMint.set(key, bucket);
     }
 
     let chosen: ProofRecord[] | undefined;
@@ -264,9 +292,10 @@ export class LocalWallet implements WalletService {
 
     const byMint = new Map<string, ProofRecord[]>();
     for (const record of available) {
-      const bucket = byMint.get(record.mintUrl) ?? [];
+      const key = normalizeMint(record.mintUrl);
+      const bucket = byMint.get(key) ?? [];
       bucket.push(record);
-      byMint.set(record.mintUrl, bucket);
+      byMint.set(key, bucket);
     }
 
     return [...byMint].map(([mintUrl, records]) => ({

@@ -4,6 +4,7 @@ import { InsufficientFundsError } from '../../src/contracts/index.js';
 import { LocalWallet } from '../../src/wallet/local-wallet.js';
 import { resetDatabase } from '../helpers/db.js';
 import { MINT_A, MINT_B, seedProofs } from '../helpers/proofs.js';
+import { freshProofs } from '../helpers/mint.js';
 
 let wallet: LocalWallet;
 
@@ -113,5 +114,55 @@ describe('FR-29: Reserve-Semantik', () => {
     const second = await wallet.reserve(5);
     const overlap = first.proofs.filter((p) => second.proofs.some((q) => q.secret === p.secret));
     expect(overlap).toEqual([]);
+  });
+});
+
+describe('NIP-61: Mint-URLs normalisieren und deduplizieren', () => {
+  // Final Consideration 2 der Spezifikation. Praktisch entsteht der Fall so:
+  // Ein Token wird unter der Schreibweise des Ausstellers importiert, das
+  // Wechselgeld eines Nutzaps landet unter der Schreibweise aus dem
+  // kind:10019 des Empfaengers. Beides ist derselbe Mint.
+  const MIT_SLASH = 'https://mint-a.example/';
+  const OHNE_SLASH = 'https://mint-a.example';
+
+  it('legt frische Proofs unter der normalisierten URL ab', async () => {
+    const wallet = new LocalWallet();
+    await wallet.addProofs(MIT_SLASH, freshProofs(MIT_SLASH, [8]));
+
+    const db = await openDatabase();
+    const records = await db.getAll('proofs');
+    expect(records.map((record) => record.mintUrl)).toEqual([OHNE_SLASH]);
+  });
+
+  it('reserviert ueber beide Schreibweisen hinweg', async () => {
+    await seedProofs([8], MIT_SLASH);
+    await seedProofs([4], OHNE_SLASH);
+    const wallet = new LocalWallet();
+
+    // 12 Sat liegen da, aber in zwei Schreibweisen. Vor der Normalisierung
+    // scheiterte das mit InsufficientFundsError.
+    const bundle = await wallet.reserve(12, OHNE_SLASH);
+
+    expect(bundle.amount).toBeGreaterThanOrEqual(12);
+    expect(bundle.proofs).toHaveLength(2);
+  });
+
+  it('fasst beide Schreibweisen zu einem Export-Token zusammen', async () => {
+    await seedProofs([8], MIT_SLASH);
+    await seedProofs([4], OHNE_SLASH);
+
+    const exports = await new LocalWallet().exportTokens();
+
+    expect(exports).toHaveLength(1);
+    expect(exports[0]).toMatchObject({ mintUrl: OHNE_SLASH, amount: 12 });
+  });
+
+  it('haelt verschiedene Mints weiterhin auseinander', async () => {
+    await seedProofs([8], 'https://mint-a.example');
+    await seedProofs([4], 'https://mint-b.example');
+
+    const exports = await new LocalWallet().exportTokens();
+
+    expect(exports).toHaveLength(2);
   });
 });
