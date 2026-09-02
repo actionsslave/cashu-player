@@ -43,8 +43,17 @@ export function BoostDialog({
   const timecode = formatTimecode(frozenSeconds);
   const remaining = BOOST_MESSAGE_MAX_LENGTH - message.length;
   const affordable = amount > 0 && amount <= balance;
-  // FR-28: die Zeitmarke wird angehängt, der Nutzer tippt sie nicht.
-  const content = message.trim() === '' ? timecode : `${message.trim()} ${timecode}`;
+  /**
+   * Was tatsächlich gesendet wird (FR-28, OQ-02).
+   *
+   * Die Folgenzuordnung steht zusätzlich als Tag am kind:9321 — aber Wallets
+   * zeigen heute nur `content`. Ein bei Nodesignal angekommener Boost wurde am
+   * 02.09.2026 ohne Folge verbucht, genau deshalb. Folge und Zeitmarke stehen
+   * deshalb vorn: Sie sind der Ordnungsschlüssel, die Nachricht ist der Zusatz.
+   * Der Podcast selbst kommt nicht in den Text — er ist der Empfänger.
+   */
+  const kopf = [episodeTitle, timecode].filter(Boolean).join(' · ');
+  const content = message.trim() === '' ? kopf : `${kopf} — ${message.trim()}`;
 
   /**
    * Der Fokus wandert genau einmal in den Dialog: beim Oeffnen.

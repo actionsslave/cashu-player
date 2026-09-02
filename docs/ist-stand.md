@@ -49,7 +49,7 @@ angefasst. Alle Aussagen unten beziehen sich auf Quelltext und Testlauf.
 | FR-24 | umgesetzt | `src/player/listening-ticker.ts` → `sample()` | `test/player/listening-ticker.test.ts` | Aus `currentTime`, nicht aus Timer-Ticks; Sprungerkennung ueber Wanduhr-Abgleich |
 | FR-25 | Code vorhanden, ungeprueft | `src/payments/streaming.ts` → `flush()` | `test/payments/streaming.test.ts` | Rest unter 1 Sat bleibt stehen. Der 60-s-Takt unter echter Wiedergabe ist ungeprueft |
 | FR-26 | umgesetzt | `src/payments/streaming-settings.ts`; UI `src/ui/settings-view.tsx` und der Satz-Dialog in `src/main.tsx` | `test/payments/streaming-settings.test.ts` | 0–1000, Vorgabe 10, einmalige Bestaetigung |
-| FR-27 | Code vorhanden, ungeprueft | `src/payments/nutzap.ts` → `buildNutzap()`, `p2pkLockKey()` | `test/payments/nutzap.test.ts`, `test/payments/pay.test.ts` | Tags `proof`/`unit`/`u`/`p`, `02`-Praefix. Ob der Empfaenger die Proofs einloesen kann, sagt nur ein Test gegen eine echte Wallet |
+| FR-27 | umgesetzt | `src/payments/nutzap.ts` → `buildNutzap()`, `p2pkLockKey()` | `test/payments/nutzap.test.ts`, `test/payments/pay.test.ts` | Tags `proof`/`unit`/`u`/`p`, `02`-Praefix, dazu die Kontext-Tags aus OQ-02. **Am 02.09.2026 gegen Nodesignal geprueft: Boost kam an und wurde als Boost verbucht.** |
 | FR-28 | umgesetzt | `src/ui/boost-dialog.tsx`; `nutzap.ts` → `formatTimecode()` | `test/ui/boost-dialog.test.tsx` | Vier Vorgaben, freier Betrag, 280 Zeichen mit Restzaehler. Die Zeitmarke wird beim Oeffnen eingefroren (02.09.2026) |
 | FR-29 | Code vorhanden, ungeprueft | `src/payments/pay.ts` → `sendNutzap()`, `retryPendingNutzaps()` | `test/payments/pay.test.ts` (17 Tests) | Beide Faelle getrennt umgesetzt und getestet, siehe unten. Am Dokument nachgezogen |
 | FR-30 | umgesetzt | `src/ui/session-column.tsx` | `test/ui/session-column.test.tsx` | Sitzungszaehler, Anzahl der Nutzaps, offener Rest, Fehlergrund. Boost-Bestaetigung als Hinweiszeile in `src/main.tsx` |
@@ -98,8 +98,12 @@ sind erfasst, keine fehlt, keine ist doppelt.
 
 Die 20 ungeprueften Zeilen sind kein Vorwurf an den Code — sie sind genau die
 Zeilen, bei denen Kapitel 8 „Menschliche Verifikation" als Engpass nennt. Die
-Liste dazu steht in [`manuelle-tests.md`](manuelle-tests.md) und ist bislang
-**vollstaendig unausgefuellt**: 43 Pruefzeilen, davon 0 mit gesetztem Ergebnis.
+Liste dazu steht in [`manuelle-tests.md`](manuelle-tests.md). Sie war lange
+vollstaendig unausgefuellt; am 02.09.2026 sind die ersten Ergebnisse
+eingetragen — der Durchstich der Empfaengeraufloesung (FR-21, FR-22, FR-23),
+ein bei Nodesignal angekommener Boost (FR-27) und die Bedienbarkeit des
+Boost-Dialogs (FR-28). Der grosse Rest steht weiterhin offen, darunter **A-01
+und A-02**, die beiden Punkte, an denen das Projekt scheitern kann.
 
 Das ist der eigentliche Befund dieser Bestandsaufnahme. Der Code ist weit;
 geprueft ist er nicht. Die zwei Punkte, an denen das Projekt scheitern kann —

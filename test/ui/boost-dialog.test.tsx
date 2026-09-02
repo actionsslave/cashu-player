@@ -80,7 +80,8 @@ describe('FR-28: Boost mit Betrag und Nachricht', () => {
     await typeMessage('Starke Folge');
     await clickSend();
 
-    expect(onSend).toHaveBeenCalledWith(2100, 'Starke Folge 00:14:07');
+    // Ohne Folgentitel bleibt nur die Zeitmarke als Kopf — gleiche Form wie mit.
+    expect(onSend).toHaveBeenCalledWith(2100, '00:14:07 — Starke Folge');
   });
 
   it('hängt die Zeitmarke auch ohne Nachricht an', async () => {
@@ -197,7 +198,7 @@ describe('Laufende Wiedergabe darf die Eingabe nicht stoeren', () => {
     await clickSend();
 
     // 847 s = 00:14:07, der Stand beim Oeffnen — nicht 907 s = 00:15:07.
-    expect(onSend).toHaveBeenCalledWith(210, 'Starke Folge 00:14:07');
+    expect(onSend).toHaveBeenCalledWith(210, '00:14:07 — Starke Folge');
   });
 
   it('zeigt die eingefrorene Zeitmarke auch in der Vorschau', async () => {
@@ -205,5 +206,41 @@ describe('Laufende Wiedergabe darf die Eingabe nicht stoeren', () => {
     await tickWhilePlaying(907);
     expect(host.textContent).toContain('00:14:07');
     expect(host.textContent).not.toContain('00:15:07');
+  });
+});
+
+describe('OQ-02: Folgenzuordnung im content', () => {
+  const MIT_FOLGE = {
+    podcastTitle: 'Nodesignal',
+    episodeTitle: 'E290 — Juni / Juli',
+  };
+
+  it('stellt Folge und Zeitmarke vor die Nachricht', async () => {
+    await mount(MIT_FOLGE);
+    await typeMessage('Starke Folge');
+    await clickSend();
+
+    expect(onSend).toHaveBeenCalledWith(210, 'E290 — Juni / Juli · 00:14:07 — Starke Folge');
+  });
+
+  it('kommt ohne Nachricht mit Folge und Zeitmarke aus', async () => {
+    await mount(MIT_FOLGE);
+    await clickSend();
+
+    expect(onSend).toHaveBeenCalledWith(210, 'E290 — Juni / Juli · 00:14:07');
+  });
+
+  it('faellt ohne Folgentitel auf die blosse Zeitmarke zurueck', async () => {
+    await mount();
+    await clickSend();
+
+    expect(onSend).toHaveBeenCalledWith(210, '00:14:07');
+  });
+
+  it('zeigt in der Vorschau genau das, was gesendet wird', async () => {
+    await mount(MIT_FOLGE);
+    await typeMessage('Starke Folge');
+
+    expect(host.textContent).toContain('E290 — Juni / Juli · 00:14:07 — Starke Folge');
   });
 });

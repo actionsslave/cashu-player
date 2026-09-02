@@ -17,7 +17,7 @@ import type { LocalWallet } from '../wallet/local-wallet.js';
 import type { MintGateway } from '../wallet/mint-gateway.js';
 import { recordPayment, updatePaymentStatus } from '../wallet/history.js';
 import { NoRelayError, type NostrGateway } from './nostr-gateway.js';
-import { buildNutzap, p2pkLockKey } from './nutzap.js';
+import { buildNutzap, p2pkLockKey, type NutzapContext } from './nutzap.js';
 
 export interface SendNutzapInput {
   target: ResolvedPaymentTarget;
@@ -26,6 +26,8 @@ export interface SendNutzapInput {
   content?: string;
   feedTitle?: string;
   episodeTitle?: string;
+  /** OQ-02: wandert als Tags an das kind:9321. */
+  context?: NutzapContext;
 }
 
 export interface SendNutzapDeps {
@@ -134,6 +136,7 @@ export async function sendNutzap(
     mintUrl,
     proofs: locked.send,
     content: input.content,
+    context: input.context,
   });
 
   let signed: SignedNostrEvent;

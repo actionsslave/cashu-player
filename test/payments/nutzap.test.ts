@@ -79,3 +79,54 @@ describe('FR-27: P2PK-Schlüssel', () => {
     expect(p2pkLockKey(`03${P2PK_PUBKEY}`)).toBe(`03${P2PK_PUBKEY}`);
   });
 });
+
+const BASIS = { target: TARGET, mintUrl: TARGET.mints[0], proofs: PROOFS };
+
+describe('OQ-02: Podcast-, Episoden- und Zeitkontext als Tags', () => {
+  const KONTEXT = {
+    podcastTitle: 'Nodesignal',
+    episodeTitle: 'E290 — Juni / Juli',
+    podcastGuid: 'a1b2c3',
+    episodeGuid: 'e-290',
+    positionSeconds: 657,
+  };
+
+  it('schreibt Titel und GUIDs von Podcast und Episode', () => {
+    const event = buildNutzap({ ...BASIS, context: KONTEXT });
+
+    expect(tagsOf(event, 'podcast')).toEqual([['podcast', 'Nodesignal']]);
+    expect(tagsOf(event, 'episode')).toEqual([['episode', 'E290 — Juni / Juli']]);
+    expect(tagsOf(event, 'podcast_guid')).toEqual([['podcast_guid', 'a1b2c3']]);
+    expect(tagsOf(event, 'episode_guid')).toEqual([['episode_guid', 'e-290']]);
+  });
+
+  it('schreibt die Hoerposition in ganzen Sekunden, wie blip-0010 sie fuehrt', () => {
+    const event = buildNutzap({ ...BASIS, context: { ...KONTEXT, positionSeconds: 657.8 } });
+    expect(tagsOf(event, 'ts')).toEqual([['ts', '657']]);
+  });
+
+  it('laesst Tags weg, zu denen es keinen Wert gibt', () => {
+    const event = buildNutzap({ ...BASIS, context: { podcastTitle: 'Nodesignal' } });
+
+    expect(tagsOf(event, 'podcast')).toHaveLength(1);
+    expect(tagsOf(event, 'episode')).toEqual([]);
+    expect(tagsOf(event, 'podcast_guid')).toEqual([]);
+    expect(tagsOf(event, 'ts')).toEqual([]);
+  });
+
+  it('FR-27: die Pflicht-Tags bleiben unberuehrt', () => {
+    const event = buildNutzap({ ...BASIS, context: KONTEXT });
+
+    expect(tagsOf(event, 'unit')).toHaveLength(1);
+    expect(tagsOf(event, 'u')).toHaveLength(1);
+    expect(tagsOf(event, 'p')).toHaveLength(1);
+    expect(event.tags.filter((tag) => tag[0] === 'proof').length).toBeGreaterThan(0);
+  });
+
+  it('kommt ohne Kontext aus — Streaming ohne aufgeloeste Episode', () => {
+    const event = buildNutzap(BASIS);
+    const namen = event.tags.map((tag) => tag[0]);
+    expect(namen).not.toContain('podcast');
+    expect(namen).not.toContain('ts');
+  });
+});

@@ -36,6 +36,7 @@ interface NowPlaying {
   podcastTitle: string;
   artworkUrl?: string;
   npub?: string;
+  podcastGuid?: string;
 }
 
 const LEER: StreamingState = {
@@ -119,6 +120,12 @@ function App() {
             kind: 'streaming',
             feedTitle: nowPlaying.podcastTitle,
             episodeTitle: nowPlaying.episode.title,
+            context: {
+              podcastTitle: nowPlaying.podcastTitle,
+              episodeTitle: nowPlaying.episode.title,
+              podcastGuid: nowPlaying.podcastGuid,
+              episodeGuid: nowPlaying.episode.guid,
+            },
           },
           { wallet, mintGateway, nostr },
         );
@@ -127,6 +134,17 @@ function App() {
       },
     });
   }, [nowPlaying, target, rate, rateConfirmed, wallet, mintGateway, nostr, refreshBalance]);
+
+  /** OQ-02: derselbe Kontext fuer Streaming und Boost. */
+  function nutzapContext(positionSeconds: number) {
+    return {
+      podcastTitle: nowPlaying?.podcastTitle,
+      episodeTitle: nowPlaying?.episode.title,
+      podcastGuid: nowPlaying?.podcastGuid,
+      episodeGuid: nowPlaying?.episode.guid,
+      positionSeconds,
+    };
+  }
 
   const handleTick = useCallback((tick: ListeningTick) => {
     setPosition(tick.positionSeconds);
@@ -153,6 +171,7 @@ function App() {
           content,
           feedTitle: nowPlaying?.podcastTitle,
           episodeTitle: nowPlaying?.episode.title,
+          context: nutzapContext(position),
         },
         { wallet, mintGateway, nostr },
       );
@@ -241,6 +260,7 @@ function App() {
                 podcastTitle: subscription.title,
                 artworkUrl: subscription.imageUrl,
                 npub: subscription.npub,
+                podcastGuid: subscription.podcastGuid,
               })
             }
           />

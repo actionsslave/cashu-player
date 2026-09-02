@@ -49,6 +49,8 @@ export interface SubscriptionRecord {
    * Optional, weil Abos aus aelteren Fassungen den Wert nicht tragen.
    */
   totalEpisodes?: number;
+  /** OQ-02: `podcast:guid` aus dem Feed, stabiler als der Titel. */
+  podcastGuid?: string;
   addedAt: number;
   refreshedAt: number;
 }
@@ -61,6 +63,8 @@ export interface EpisodeRecord {
   enclosureUrl: string;
   publishedAt: number;
   durationSeconds?: number;
+  /** OQ-02: guid des Items aus dem Feed, ohne das Abo-Praefix aus `id`. */
+  guid?: string;
 }
 
 /** Hörposition je Episode (FR-14). */

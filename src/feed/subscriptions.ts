@@ -48,6 +48,7 @@ async function storeFeed(
     loadedViaProxy: viaProxy,
     npub: parsed.npub,
     totalEpisodes: parsed.totalEpisodes,
+    podcastGuid: parsed.podcastGuid,
     addedAt,
     refreshedAt: Date.now(),
   };
@@ -70,6 +71,7 @@ async function storeFeed(
       enclosureUrl: episode.enclosureUrl,
       publishedAt: episode.publishedAt,
       durationSeconds: episode.durationSeconds,
+      guid: episode.guid,
     };
     await episodes.put(stored);
   }

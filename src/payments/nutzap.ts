@@ -11,12 +11,50 @@ import type { UnsignedNostrEvent } from '../identity/nip07.js';
 
 export const NUTZAP_KIND = 9321;
 
+/**
+ * OQ-02: Podcast-, Episoden- und Zeitkontext maschinenlesbar.
+ *
+ * Auf dem Nutzap-Weg gibt es kein TLV-Feld wie blip-0010 es auf Lightning
+ * kennt. Die Felder heissen deshalb wie dort — podcast, episode, ts — und
+ * stehen als eigene Tags am kind:9321. Das ist ein Vorschlag, keine Konvention:
+ * Bisher liest sie niemand, und Wallets zeigen nur `content`. Deshalb steht
+ * derselbe Kontext zusaetzlich lesbar im content (siehe boost-dialog.tsx).
+ */
+export interface NutzapContext {
+  podcastTitle?: string;
+  episodeTitle?: string;
+  /** `podcast:guid` aus dem Feed — stabil, anders als der Titel. */
+  podcastGuid?: string;
+  /** guid des Items aus dem Feed. */
+  episodeGuid?: string;
+  /** Hoerposition in Sekunden; wird als ganze Sekunde geschrieben. */
+  positionSeconds?: number;
+}
+
 export interface NutzapInput {
   target: ResolvedPaymentTarget;
   /** Mint, bei dem die Proofs liegen — muss aus target.mints stammen. */
   mintUrl: string;
   proofs: StoredProof[];
   content?: string;
+  context?: NutzapContext;
+}
+
+/** Nur Tags, zu denen es einen Wert gibt — ein leeres Tag sagt nichts. */
+function contextTags(context: NutzapContext | undefined): string[][] {
+  if (!context) return [];
+  const tags: string[][] = [];
+  const add = (name: string, value: string | undefined) => {
+    if (value !== undefined && value !== '') tags.push([name, value]);
+  };
+  add('podcast', context.podcastTitle);
+  add('episode', context.episodeTitle);
+  add('podcast_guid', context.podcastGuid);
+  add('episode_guid', context.episodeGuid);
+  if (context.positionSeconds !== undefined) {
+    add('ts', String(Math.max(0, Math.floor(context.positionSeconds))));
+  }
+  return tags;
 }
 
 /**
@@ -37,6 +75,7 @@ export function buildNutzap(input: NutzapInput): UnsignedNostrEvent {
       ['unit', WALLET_UNIT],
       ['u', input.mintUrl],
       ['p', input.target.pubkeyHex],
+      ...contextTags(input.context),
     ],
     content: input.content ?? '',
   };
