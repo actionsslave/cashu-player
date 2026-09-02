@@ -211,6 +211,25 @@ einem echten schmalen Fenster angesehen. Ebenso ungeprueft: Fokus-Falle und
 Fokus-Rueckgabe des Boost-Dialogs (Escape und Abbrechen schliessen, das ist
 umgesetzt und getestet — die Fokusfuehrung selbst nicht).
 
+## Offene Fragen, die aus dem Code stammen
+
+Am 02.09.2026 sind **OQ-09** und **OQ-10** ins Anforderungs-Dokument
+gekommen. Beide fielen beim Erweitern der Mint-Liste auf, keine steht bisher
+irgendwo sonst:
+
+- **OQ-09** — bleibt die erlaubte Mint-Liste eine Build-Konstante? Die Frage
+  ist nicht kosmetisch: `pay.ts` legt das Wechselgeld nach dem Swap beim Mint
+  des *Empfaengers* ab (`addProofs(mintUrl, locked.keep)`). Wer die Liste
+  oeffnet, gibt damit die Obhut ueber den Rest an einen Mint, den ein Fremder
+  ausgesucht hat.
+- **OQ-10** — die Zahlung scheitert, wenn das Guthaben beim falschen der
+  erlaubten Mints liegt. `sendNutzap` reserviert nur, es mintet nichts nach und
+  verschiebt nichts zwischen Mints. Mit einem Mint faellt das nicht auf; seit
+  dem 02.09.2026 stehen vier in der Liste.
+
+Beides ist **nicht implementiert und nicht geplant** — es sind Fragen, keine
+Aufgaben.
+
 ## Blockiert
 
 **A-01 und A-02 kann ich nicht abnehmen.** Beide verlangen einen Browser mit
