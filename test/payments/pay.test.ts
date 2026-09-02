@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { closeDatabase, openDatabase } from '../../src/db/database.js';
 import { InsufficientFundsError, type ResolvedPaymentTarget } from '../../src/contracts/index.js';
 import { LocalWallet } from '../../src/wallet/local-wallet.js';
-import { MintUnreachableError } from '../../src/wallet/mint-gateway.js';
+import { MintCapabilityError, MintUnreachableError } from '../../src/wallet/mint-gateway.js';
 import { NoRelayError } from '../../src/payments/nostr-gateway.js';
 import { retryPendingNutzaps, sendNutzap } from '../../src/payments/pay.js';
 import { listHistory } from '../../src/wallet/history.js';
@@ -146,6 +146,22 @@ describe('FR-29: Abbruch vor dem Mint-Swap', () => {
       sendNutzap({ target: TARGET, amount: 10, kind: 'boost' }, deps({ nostr })),
     ).rejects.toBeInstanceOf(InsufficientFundsError);
 
+    expect(nostr.published).toEqual([]);
+    expect((await listHistory())[0]).toMatchObject({ status: 'fehlgeschlagen' });
+  });
+
+  it('NIP-61: ein Mint ohne NUT-11 bricht ab, bevor geswappt wird', async () => {
+    await seedProofs([64]);
+    const nostr = fakeNostr();
+    const d = deps({ mintGateway: fakeGateway({ ohneP2pk: true }), nostr });
+
+    await expect(
+      sendNutzap({ target: TARGET, amount: 10, kind: 'boost' }, d),
+    ).rejects.toBeInstanceOf(MintCapabilityError);
+
+    // Ohne durchgesetztes P2PK waere der Nutzap fuer jeden ausgebbar — also
+    // gar nicht erst senden. Guthaben vollstaendig zurueck, nichts publiziert.
+    await expect(d.wallet.balance()).resolves.toBe(64);
     expect(nostr.published).toEqual([]);
     expect((await listHistory())[0]).toMatchObject({ status: 'fehlgeschlagen' });
   });

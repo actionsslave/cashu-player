@@ -14,7 +14,7 @@ import {
 } from '@cashu/cashu-ts';
 import { WALLET_UNIT } from '../config/build-config.js';
 import type { StoredProof } from '../contracts/index.js';
-import { MintUnreachableError, type MintGateway } from './mint-gateway.js';
+import { assertCanLockP2PK, MintUnreachableError, type MintGateway } from './mint-gateway.js';
 
 function toStored(proofs: Proof[]): StoredProof[] {
   return proofs.map((proof) => ({ ...proof, amount: proof.amount.toNumber() }));
@@ -72,6 +72,11 @@ export class CashuMintGateway implements MintGateway {
     p2pkPubkey?: string,
   ): Promise<{ send: StoredProof[]; keep: StoredProof[] }> {
     const wallet = await this.walletFor(mintUrl);
+    // NIP-61: Erst prüfen, ob der Mint P2PK überhaupt durchsetzt, dann swappen.
+    // Danach ist der Swap unwiderruflich, und ein Nutzap ohne durchgesetztes
+    // P2PK wäre für jeden ausgebbar, der das Event liest.
+    if (p2pkPubkey) assertCanLockP2PK(mintUrl, wallet.getMintInfo());
+
     return mapNetworkError(mintUrl, async () => {
       // NUT-11: die abgespaltenen Proofs werden auf den Empfänger gelockt (FR-27).
       const outputConfig = p2pkPubkey

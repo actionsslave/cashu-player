@@ -1,7 +1,7 @@
 import { Amount, getEncodedToken } from '@cashu/cashu-ts';
 import type { StoredProof } from '../../src/contracts/index.js';
 import type { MintGateway } from '../../src/wallet/mint-gateway.js';
-import { MintUnreachableError } from '../../src/wallet/mint-gateway.js';
+import { assertCanLockP2PK, MintUnreachableError } from '../../src/wallet/mint-gateway.js';
 
 let counter = 0;
 
@@ -27,6 +27,8 @@ export interface FakeGatewayOptions {
   spent?: boolean;
   unreachable?: boolean;
   received?: StoredProof[];
+  /** Mint ohne NUT-11: der Swap wird abgelehnt, bevor er stattfindet. */
+  ohneP2pk?: boolean;
 }
 
 /** Ersetzt nur die Netzwerkschicht; die Wallet-Logik läuft echt. */
@@ -40,8 +42,11 @@ export function fakeGateway(options: FakeGatewayOptions = {}): MintGateway {
       if (options.unreachable) throw new MintUnreachableError(mintUrl);
       return options.received ?? freshProofs(mintUrl, [Number(token.length % 7) + 1]);
     },
-    async send(mintUrl, amount, proofs) {
+    async send(mintUrl, amount, proofs, p2pkPubkey) {
       if (options.unreachable) throw new MintUnreachableError(mintUrl);
+      if (options.ohneP2pk && p2pkPubkey) {
+        assertCanLockP2PK(mintUrl, { isSupported: () => ({ supported: false }) });
+      }
       const total = proofs.reduce((s, p) => s + Number(p.amount), 0);
       return {
         send: freshProofs(mintUrl, [amount]),
