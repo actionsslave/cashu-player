@@ -30,21 +30,48 @@ export function BoostDialog({
   const [sending, setSending] = useState(false);
   const dialogRef = useRef<HTMLDivElement | null>(null);
 
-  const timecode = formatTimecode(positionSeconds);
+  /**
+   * Die Zeitmarke wird beim Oeffnen eingefroren.
+   *
+   * Sonst liefe sie waehrend der Eingabe weiter, und der Boost truege eine
+   * andere Stelle als die, die der Nutzer beim Klick auf "Boost" gesehen hat.
+   * Der Startwert von useState wird nur beim ersten Render ausgewertet — genau
+   * das ist hier gewollt.
+   */
+  const [frozenSeconds] = useState(positionSeconds);
+
+  const timecode = formatTimecode(frozenSeconds);
   const remaining = BOOST_MESSAGE_MAX_LENGTH - message.length;
   const affordable = amount > 0 && amount <= balance;
   // FR-28: die Zeitmarke wird angehängt, der Nutzer tippt sie nicht.
   const content = message.trim() === '' ? timecode : `${message.trim()} ${timecode}`;
 
-  // Escape schließt; der Fokus wandert beim Öffnen in den Dialog.
+  /**
+   * Der Fokus wandert genau einmal in den Dialog: beim Oeffnen.
+   *
+   * Frueher hing dieser Effekt an [onCancel]. Die App reicht dort eine
+   * Pfeilfunktion durch, also eine neue Identitaet bei jedem Render — und
+   * waehrend der Wiedergabe rendert die App viermal pro Sekunde neu. Der
+   * Effekt lief also viermal pro Sekunde und riss den Fokus aus dem Feld, in
+   * das der Nutzer gerade tippte. Leere Abhaengigkeiten, damit das nicht
+   * wiederkommt.
+   */
   useEffect(() => {
     dialogRef.current?.focus();
+  }, []);
+
+  // onCancel liegt in einem Ref, damit der Escape-Handler nicht bei jedem
+  // Render neu registriert werden muss.
+  const cancelRef = useRef(onCancel);
+  cancelRef.current = onCancel;
+
+  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onCancel();
+      if (event.key === 'Escape') cancelRef.current();
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [onCancel]);
+  }, []);
 
   async function handleSend() {
     setSending(true);

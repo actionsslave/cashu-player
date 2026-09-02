@@ -150,3 +150,60 @@ describe('US-06-AC-3: Abbrechen', () => {
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('Laufende Wiedergabe darf die Eingabe nicht stoeren', () => {
+  /** Rendert erneut mit veraenderter Position und frischen Callbacks — genau
+   *  das, was das timeupdate des Audio-Elements viermal pro Sekunde ausloest. */
+  async function tickWhilePlaying(positionSeconds: number) {
+    render(
+      <BoostDialog
+        balance={5000}
+        positionSeconds={positionSeconds}
+        onSend={onSend}
+        onCancel={() => undefined}
+      />,
+      host,
+    );
+    await flush();
+  }
+
+  it('behaelt den Fokus im Nachrichtenfeld, waehrend die Position weiterlaeuft', async () => {
+    await mount();
+    const feld = host.querySelector('textarea') as HTMLTextAreaElement;
+    feld.focus();
+    expect(document.activeElement).toBe(feld);
+
+    await tickWhilePlaying(848);
+    await tickWhilePlaying(849);
+
+    expect(document.activeElement).toBe(feld);
+  });
+
+  it('behaelt den Fokus im Betragsfeld', async () => {
+    await mount();
+    const feld = host.querySelector('input[name="boost-amount"]') as HTMLInputElement;
+    feld.focus();
+
+    await tickWhilePlaying(848);
+
+    expect(document.activeElement).toBe(feld);
+  });
+
+  it('friert die Zeitmarke beim Oeffnen ein', async () => {
+    await mount();
+    // Die Wiedergabe laeuft eine Minute weiter, waehrend der Nutzer tippt.
+    await tickWhilePlaying(907);
+    await typeMessage('Starke Folge');
+    await clickSend();
+
+    // 847 s = 00:14:07, der Stand beim Oeffnen — nicht 907 s = 00:15:07.
+    expect(onSend).toHaveBeenCalledWith(210, 'Starke Folge 00:14:07');
+  });
+
+  it('zeigt die eingefrorene Zeitmarke auch in der Vorschau', async () => {
+    await mount();
+    await tickWhilePlaying(907);
+    expect(host.textContent).toContain('00:14:07');
+    expect(host.textContent).not.toContain('00:15:07');
+  });
+});
