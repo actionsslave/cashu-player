@@ -45,6 +45,29 @@ export const ALLOWED_MINTS: readonly string[] = [
 ];
 
 /**
+ * Mints, die nur der Entwicklung dienen.
+ *
+ * Ihre Tokens sind wertlos. Sie bleiben in ALLOWED_MINTS, damit sich in der
+ * Entwicklung damit arbeiten lässt — aber die App nennt sie niemandem
+ * gegenüber, damit kein Nutzer auf die Idee kommt, dem Podcast Testnetz-Geld
+ * zu schicken.
+ *
+ * **Ausblenden ist nicht Ablehnen.** Ein Testnut-Token wird weiterhin
+ * angenommen und erscheint als Guthaben. Wer das verhindern will, muss den
+ * Mint aus ALLOWED_MINTS entfernen — dann geht er auch beim Entwickeln nicht
+ * mehr.
+ */
+export const DEVELOPMENT_MINTS: readonly string[] = [
+  'https://testnut.cashu.exchange',
+  'https://testnut.cashu.space',
+];
+
+/** Die Mints, die die App nach außen nennt — alles außer den Entwicklungs-Mints. */
+export function publicMints(): string[] {
+  return ALLOWED_MINTS.filter((mint) => !DEVELOPMENT_MINTS.includes(mint));
+}
+
+/**
  * Relays für das Nachschlagen von kind:10019 (FR-22).
  * Nutzaps selbst gehen ausschließlich an die Relays aus dem kind:10019 des
  * Empfängers, nicht an diese Liste (FR-27, NR-02).

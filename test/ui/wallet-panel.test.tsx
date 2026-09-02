@@ -135,3 +135,27 @@ describe('FR-19: Verlauf', () => {
     expect(history).toContain('Aufladung');
   });
 });
+
+describe('FR-17: welche Mints akzeptiert werden', () => {
+  it('nennt die oeffentlichen Mints beim Aufladen', async () => {
+    await mount(makeWallet());
+    const liste = host.querySelector('.accepted-mints')?.textContent ?? '';
+
+    expect(liste).toContain('mint.minibits.cash');
+    expect(liste).toContain('mint.macadamia.cash');
+  });
+
+  it('blendet die Entwicklungs-Mints aus', async () => {
+    await mount(makeWallet());
+    // Niemand soll auf die Idee kommen, Testnetz-Geld zu schicken.
+    expect(host.textContent).not.toContain('testnut');
+  });
+
+  it('zeigt die Mints ohne das https-Praefix, aber mit Pfad', async () => {
+    await mount(makeWallet());
+    const eintraege = [...host.querySelectorAll('.accepted-mints li')].map((n) =>
+      n.textContent?.trim(),
+    );
+    expect(eintraege).toEqual(['mint.minibits.cash/Bitcoin', 'mint.macadamia.cash']);
+  });
+});

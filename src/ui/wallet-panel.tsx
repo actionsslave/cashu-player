@@ -11,6 +11,7 @@ import { listHistory } from '../wallet/history.js';
 import { readStorageMode, type StorageMode } from '../wallet/persistence.js';
 import { TokenImportError } from '../wallet/mint-gateway.js';
 import type { LocalWallet, TokenExport } from '../wallet/local-wallet.js';
+import { publicMints } from '../config/build-config.js';
 import { QrCode } from './qr-code.js';
 
 export interface WalletPanelProps {
@@ -24,6 +25,11 @@ const STATUS_TAG: Record<HistoryRecord['status'], string> = {
   ausstehend: 'tag tag-neutral',
   fehlgeschlagen: 'tag tag-accent-2',
 };
+
+/** `https://` weg, Pfad bleibt — der Pfad gehoert bei Minibits zur Adresse. */
+function mintLabel(url: string): string {
+  return url.replace(/^https:\/\//, '').replace(/\/+$/, '');
+}
 
 const KIND_LABEL: Record<HistoryRecord['kind'], string> = {
   streaming: 'Streaming',
@@ -108,8 +114,18 @@ export function WalletPanel({ wallet, onBalanceChange }: WalletPanelProps) {
         <div>
           <h3>Aufladen</h3>
           <p class="subline text-muted">
-            Füge einen Cashu-Token eines erlaubten Mints ein, lautend auf Sat.
+            Füge einen Cashu-Token eines dieser Mints ein, lautend auf Sat:
           </p>
+          {/*
+            Die Entwicklungs-Mints stehen bewusst nicht hier — niemand soll auf
+            die Idee kommen, Testnetz-Geld zu schicken. Angenommen werden sie
+            trotzdem, siehe DEVELOPMENT_MINTS in der Build-Konfiguration.
+          */}
+          <ul class="accepted-mints">
+            {publicMints().map((mint) => (
+              <li key={mint}>{mintLabel(mint)}</li>
+            ))}
+          </ul>
           <textarea
             id="token-input"
             class="input token-input"

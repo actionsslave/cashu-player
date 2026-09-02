@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   ALLOWED_MINTS,
+  DEVELOPMENT_MINTS,
+  publicMints,
   DEMO_RELAYS,
   FEED_PROXY_URL,
   PLACEHOLDER_MARKER,
@@ -57,5 +59,39 @@ describe('Build-Konstanten', () => {
   it('NR-07: kein Eintrag doppelt, auch nicht in anderer Schreibweise', () => {
     const normalisiert = ALLOWED_MINTS.map((mint) => mint.toLowerCase().replace(/\/+$/, ''));
     expect(new Set(normalisiert).size).toBe(ALLOWED_MINTS.length);
+  });
+
+  it('publicMints blendet die Entwicklungs-Mints aus', () => {
+    const oeffentlich = publicMints();
+    expect(oeffentlich).toEqual([
+      'https://mint.minibits.cash/Bitcoin',
+      'https://mint.macadamia.cash',
+    ]);
+    for (const mint of DEVELOPMENT_MINTS) {
+      expect(oeffentlich).not.toContain(mint);
+    }
+  });
+
+  it('jeder Entwicklungs-Mint steht auch in der erlaubten Liste', () => {
+    // Sonst blendete publicMints etwas aus, das ohnehin nie ankaeme.
+    for (const mint of DEVELOPMENT_MINTS) {
+      expect(ALLOWED_MINTS).toContain(mint);
+    }
+  });
+
+  it('NR-07: publicMints lockert die Annahme nicht — sie zeigt nur weniger', () => {
+    // Ausblenden ist nicht Ablehnen: Ein Testnut-Token wird weiterhin
+    // angenommen. Wer das aendern will, muss ALLOWED_MINTS aendern.
+    expect(publicMints().length).toBeLessThan(ALLOWED_MINTS.length);
+    expect(ALLOWED_MINTS).toContain('https://testnut.cashu.space');
+  });
+
+  it('kein oeffentlicher Mint sieht nach Testnetz aus', () => {
+    // Sicherung gegen den wahrscheinlichsten Fehler: jemand traegt einen
+    // weiteren Testmint in ALLOWED_MINTS ein und vergisst DEVELOPMENT_MINTS.
+    // Dann stuende er auf der Wallet-Seite, und Nutzer schickten Testnetz-Geld.
+    for (const mint of publicMints()) {
+      expect(mint.toLowerCase()).not.toMatch(/testnut|testnet|signet|regtest/);
+    }
   });
 });
