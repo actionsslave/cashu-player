@@ -1,19 +1,30 @@
 /**
- * Kopfzeile mit Anmeldung (FR-01, FR-02, FR-05, FR-06).
+ * Anmeldung (FR-01, FR-02, FR-05, FR-06).
+ *
+ * Der Entwurf setzt die Identität in die Navigationszeile und hat für den
+ * Extension-Hinweis aus FR-01 keinen Platz. Deshalb liegt der Zustand in einem
+ * Hook: die Navigation zeigt das Bedienelement, die Seite darunter die Hinweise.
  */
-import { useEffect, useState } from 'preact/hooks';
+import { useCallback, useEffect, useState } from 'preact/hooks';
 import { SUGGESTED_EXTENSIONS } from '../config/build-config.js';
 import { detectSigner, SignerError } from '../identity/nip07.js';
 import { login, logout, restoreSession, shortNpub, type Session } from '../identity/session.js';
 
-export interface IdentityBarProps {
-  onSessionChange?: (session: Session | undefined) => void;
+export interface Identity {
+  session: Session | undefined;
+  notice: string | undefined;
+  showExtensions: boolean;
+  confirmingLogout: boolean;
+  signIn: () => Promise<void>;
+  askLogout: () => void;
+  cancelLogout: () => void;
+  confirmLogout: () => Promise<void>;
 }
 
-export function IdentityBar({ onSessionChange }: IdentityBarProps) {
+export function useIdentity(onSessionChange?: (session: Session | undefined) => void): Identity {
   const [session, setSession] = useState<Session | undefined>(undefined);
   const [notice, setNotice] = useState<string | undefined>(undefined);
-  // FR-01: fehlt window.ostr beim Start, nennt die App zwei Extensions.
+  // FR-01: fehlt window.nostr beim Start, nennt die App zwei Extensions.
   const [showExtensions, setShowExtensions] = useState(!detectSigner().available);
   const [confirmingLogout, setConfirmingLogout] = useState(false);
 
@@ -24,7 +35,7 @@ export function IdentityBar({ onSessionChange }: IdentityBarProps) {
     });
   }, [onSessionChange]);
 
-  async function handleLogin() {
+  const signIn = useCallback(async () => {
     setNotice(undefined);
     try {
       const next = await login();
@@ -42,36 +53,57 @@ export function IdentityBar({ onSessionChange }: IdentityBarProps) {
         setNotice('Anmeldung abgebrochen');
       }
     }
-  }
+  }, [onSessionChange]);
 
-  async function handleLogout() {
+  const confirmLogout = useCallback(async () => {
     await logout();
     setSession(undefined);
     setConfirmingLogout(false);
     onSessionChange?.(undefined);
+  }, [onSessionChange]);
+
+  return {
+    session,
+    notice,
+    showExtensions,
+    confirmingLogout,
+    signIn,
+    askLogout: () => setConfirmingLogout(true),
+    cancelLogout: () => setConfirmingLogout(false),
+    confirmLogout,
+  };
+}
+
+/** Das Bedienelement in der Navigationszeile (Entwurf 1a bzw. 3c). */
+export function IdentityControl({ identity }: { identity: Identity }) {
+  if (!identity.session) {
+    // 3c: statt Guthaben und npub steht hier die Aufforderung.
+    return (
+      <button type="button" class="btn btn-secondary" onClick={() => void identity.signIn()}>
+        Mit nostr anmelden
+      </button>
+    );
   }
-
   return (
-    <header class="identity-bar">
-      {session ? (
-        <>
-          <span class="npub" title="Angemeldet">
-            {shortNpub(session.npub)}
-          </span>
-          <button type="button" onClick={() => setConfirmingLogout(true)}>
-            Abmelden
-          </button>
-        </>
-      ) : (
-        <button type="button" onClick={() => void handleLogin()}>
-          Mit nostr anmelden
-        </button>
-      )}
+    <>
+      <span class="nav-npub" title="Angemeldet">
+        {shortNpub(identity.session.npub)}
+      </span>
+      <button type="button" class="btn btn-ghost" onClick={identity.askLogout}>
+        Abmelden
+      </button>
+    </>
+  );
+}
 
-      {notice && <p class="notice">{notice}</p>}
+/** Hinweise und der Abmelde-Dialog, unterhalb der Navigationszeile. */
+export function IdentityNotices({ identity }: { identity: Identity }) {
+  return (
+    <>
+      {identity.notice && <p class="notice">{identity.notice}</p>}
 
-      {showExtensions && (
-        <p class="extensions">
+      {identity.showExtensions && (
+        <p class="notice">
           Für die Anmeldung wird eine NIP-07-Extension gebraucht, zum Beispiel{' '}
           {SUGGESTED_EXTENSIONS.map((extension, index) => (
             <>
@@ -85,17 +117,26 @@ export function IdentityBar({ onSessionChange }: IdentityBarProps) {
         </p>
       )}
 
-      {confirmingLogout && (
-        <div class="dialog" role="dialog" aria-label="Abmelden bestätigen">
-          <p>Abmelden? Deine Wallet bleibt erhalten, nur die nostr-Identität wird entfernt.</p>
-          <button type="button" onClick={() => void handleLogout()}>
-            Ja, abmelden
-          </button>
-          <button type="button" onClick={() => setConfirmingLogout(false)}>
-            Abbrechen
-          </button>
+      {identity.confirmingLogout && (
+        <div class="dialog-backdrop">
+          <div class="dialog" role="dialog" aria-label="Abmelden bestätigen">
+            <p class="dialog-title">Abmelden?</p>
+            <p>Deine Wallet bleibt erhalten, nur die nostr-Identität wird entfernt.</p>
+            <div class="dialog-actions">
+              <button type="button" class="btn btn-secondary" onClick={identity.cancelLogout}>
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onClick={() => void identity.confirmLogout()}
+              >
+                Ja, abmelden
+              </button>
+            </div>
+          </div>
         </div>
       )}
-    </header>
+    </>
   );
 }

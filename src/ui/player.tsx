@@ -1,6 +1,9 @@
 /**
- * Player (FR-12, FR-13, FR-14). Gibt gehörte Zeit als ListeningTick nach oben —
- * daran hängt Paket E die Streaming-Zahlungen.
+ * Now-playing-Block aus Entwurf 1a (FR-12, FR-13, FR-14).
+ *
+ * Cover links, Titel und Bedienung in der Mitte, die Session-Spalte setzt die
+ * Seite daneben. Der Boost-Knopf sitzt rechts in der Transportzeile —
+ * Variante 2a, schwarze Fläche, das lauteste Element der Seite.
  */
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { EpisodeRecord } from '../db/database.js';
@@ -8,25 +11,55 @@ import type { ListeningTick } from '../contracts/index.js';
 import { ListeningTicker } from '../player/listening-ticker.js';
 import { PositionPersister, loadPosition } from '../player/position-store.js';
 import { setMediaSessionHandlers, updateMediaSession } from '../player/media-session.js';
-import { formatDuration } from './feed-view.js';
 import { PLAYBACK_RATES, PLAYBACK_RATE_DEFAULT } from '../config/build-config.js';
 
 const SKIP_FORWARD_SECONDS = 30;
 const SKIP_BACKWARD_SECONDS = 15;
 
-/** 0.8 wird zu "0,8x", 1 zu "1x" — ohne nachlaufende Null. */
+/** 0.8 wird zu "0,8×", 1 zu "1×" — ohne nachlaufende Null. */
 function formatRate(rate: number): string {
-  return `${String(rate).replace('.', ',')}x`;
+  return `${String(rate).replace('.', ',')}×`;
+}
+
+/** hh:mm:ss, wie die Zeitzeile im Entwurf. */
+export function formatClock(seconds: number): string {
+  const total = Math.max(0, Math.floor(seconds));
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${pad(Math.floor(total / 3600))}:${pad(Math.floor((total % 3600) / 60))}:${pad(total % 60)}`;
+}
+
+/** Kompakte Dauer für die Meta-Zeile: 1:12:40 beziehungsweise 12:40. */
+export function formatDuration(seconds: number | undefined): string {
+  if (!seconds) return '';
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const rest = seconds % 60;
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return hours > 0 ? `${hours}:${pad(minutes)}:${pad(rest)}` : `${minutes}:${pad(rest)}`;
 }
 
 export interface PlayerProps {
   episode?: EpisodeRecord;
   podcastTitle?: string;
   artworkUrl?: string;
+  /** Text hinter der Dauer: „streamt 10 Sat/min", „streamt nicht", „nur hören". */
+  streamingNote?: string;
+  canBoost?: boolean;
+  onBoost?: () => void;
   onTick?: (tick: ListeningTick) => void;
+  onPositionChange?: (seconds: number) => void;
 }
 
-export function Player({ episode, podcastTitle = '', artworkUrl, onTick }: PlayerProps) {
+export function Player({
+  episode,
+  podcastTitle = '',
+  artworkUrl,
+  streamingNote,
+  canBoost = false,
+  onBoost,
+  onTick,
+  onPositionChange,
+}: PlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [position, setPosition] = useState(0);
@@ -34,6 +67,11 @@ export function Player({ episode, podcastTitle = '', artworkUrl, onTick }: Playe
 
   const episodeId = episode?.id;
   const duration = episode?.durationSeconds ?? 0;
+
+  function reportPosition(seconds: number): void {
+    setPosition(seconds);
+    onPositionChange?.(seconds);
+  }
 
   // Ticker, Positionsspeicher und Startposition hängen an der Episode.
   useEffect(() => {
@@ -108,63 +146,80 @@ export function Player({ episode, podcastTitle = '', artworkUrl, onTick }: Playe
     if (!audio) return;
     const next = Math.max(0, audio.currentTime + seconds);
     audio.currentTime = duration > 0 ? Math.min(next, duration) : next;
-    setPosition(audio.currentTime);
+    reportPosition(audio.currentTime);
   }
 
-  function scrubTo(seconds: number): void {
+  /** Die Fortschrittsleiste ist anklickbar; der Anteil ergibt die Zielzeit. */
+  function seekToFraction(event: MouseEvent): void {
     const audio = audioRef.current;
-    if (!audio) return;
-    audio.currentTime = seconds;
-    setPosition(seconds);
+    if (!audio || duration <= 0) return;
+    const target = event.currentTarget as HTMLElement;
+    const box = target.getBoundingClientRect();
+    if (box.width === 0) return;
+    const fraction = Math.min(1, Math.max(0, (event.clientX - box.left) / box.width));
+    audio.currentTime = fraction * duration;
+    reportPosition(audio.currentTime);
   }
 
-  if (!episode) {
-    return (
-      <section class="player">
-        <p class="meta">Keine Episode ausgewählt.</p>
-      </section>
-    );
-  }
+  if (!episode) return null;
+
+  const played = duration > 0 ? Math.min(1, position / duration) : 0;
 
   return (
-    <section class="player">
-      <h3>{episode.title}</h3>
+    <div class="centre">
+      <span class="kicker">Läuft gerade{podcastTitle ? ` · ${podcastTitle}` : ''}</span>
+      <h1>{episode.title}</h1>
+      <p class="meta text-muted">
+        {formatDuration(duration)}
+        {streamingNote ? ` · ${streamingNote}` : ''}
+      </p>
+
       <audio
         ref={audioRef}
         src={episode.enclosureUrl}
         preload="metadata"
-        onTimeUpdate={(event) => setPosition((event.currentTarget as HTMLAudioElement).currentTime)}
+        onTimeUpdate={(event) => reportPosition((event.currentTarget as HTMLAudioElement).currentTime)}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
       />
-      <div class="controls">
-        <button type="button" onClick={() => skip(-SKIP_BACKWARD_SECONDS)}>
+
+      <div
+        class="progress-track"
+        role="slider"
+        tabIndex={0}
+        aria-label="Fortschritt"
+        aria-valuemin={0}
+        aria-valuemax={Math.floor(duration)}
+        aria-valuenow={Math.floor(position)}
+        onClick={seekToFraction}
+      >
+        <div class="progress-fill" style={{ width: `${played * 100}%` }} />
+      </div>
+
+      <div class="time-row">
+        <span>{formatClock(position)}</span>
+        <span>{duration > 0 ? `−${formatClock(duration - position)}` : ''}</span>
+      </div>
+
+      <div class="transport">
+        <button type="button" class="btn btn-secondary" onClick={() => skip(-SKIP_BACKWARD_SECONDS)}>
           −15 s
         </button>
         {playing ? (
-          <button type="button" onClick={() => halt()}>
+          <button type="button" class="btn btn-primary" onClick={() => halt()}>
             Pause
           </button>
         ) : (
-          <button type="button" onClick={() => void start()}>
+          <button type="button" class="btn btn-primary" onClick={() => void start()}>
             Abspielen
           </button>
         )}
-        <button type="button" onClick={() => skip(SKIP_FORWARD_SECONDS)}>
+        <button type="button" class="btn btn-secondary" onClick={() => skip(SKIP_FORWARD_SECONDS)}>
           +30 s
         </button>
-        <span class="meta">
-          {formatDuration(Math.floor(position))}
-          {duration > 0 ? ` / ${formatDuration(duration)}` : ''}
-        </span>
-        {/*
-          FR-12: Die Hoerzeit zaehlt in Medienzeit. Bei 2x laeuft der
-          Streaming-Zaehler doppelt so schnell hoch — es wird in derselben
-          Wanduhrzeit doppelt so viel Inhalt gehoert, nicht mehr pro Minute
-          Inhalt gezahlt (FR-24, NR-06).
-        */}
         <select
           name="playback-rate"
+          class="input rate"
           aria-label="Abspielgeschwindigkeit"
           value={String(rate)}
           onChange={(event) => setRate(Number((event.target as HTMLSelectElement).value))}
@@ -175,17 +230,15 @@ export function Player({ episode, podcastTitle = '', artworkUrl, onTick }: Playe
             </option>
           ))}
         </select>
+        <button
+          type="button"
+          class="btn btn-boost"
+          disabled={!canBoost}
+          onClick={() => onBoost?.()}
+        >
+          Boost
+        </button>
       </div>
-      <input
-        type="range"
-        class="progress"
-        min={0}
-        max={duration}
-        step={1}
-        value={position}
-        aria-label="Fortschritt"
-        onInput={(event) => scrubTo(Number((event.target as HTMLInputElement).value))}
-      />
-    </section>
+    </div>
   );
 }

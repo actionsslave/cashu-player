@@ -76,8 +76,12 @@ export const WALLET_UNIT = 'sat';
 /** Untergrenze, ab der Streaming-Zahlungen stoppen (FR-20). */
 export const MIN_BALANCE_SATS = 10;
 
-/** Boost-Vorgabebeträge in Sat (FR-28). */
-export const BOOST_PRESETS_SATS: readonly number[] = [100, 1000, 5000, 21000];
+/**
+ * Boost-Vorgabebeträge in Sat (FR-28).
+ * Vielfache von 21 aus dem Design-Handoff (Entwurf 1e) — dort ausdrücklich als
+ * gewollt bezeichnet und deshalb nicht auf runde Zahlen zurückgedreht.
+ */
+export const BOOST_PRESETS_SATS: readonly number[] = [210, 2100, 4200, 21000];
 
 /** Maximale Länge der Boost-Nachricht (FR-28). */
 export const BOOST_MESSAGE_MAX_LENGTH = 280;

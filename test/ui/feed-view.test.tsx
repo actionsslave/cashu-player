@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { closeDatabase } from '../../src/db/database.js';
 import { FeedView } from '../../src/ui/feed-view.js';
 import { resetDatabase } from '../helpers/db.js';
-import { clickButton, flush } from '../helpers/ui.js';
+import { clickButton, flush, waitFor } from '../helpers/ui.js';
 import { EPISODES_VISIBLE } from '../../src/config/build-config.js';
 import { FEED_OHNE_NOSTR, VOLLSTAENDIGER_FEED, feedMitEpisoden } from '../feed/fixtures.js';
 
@@ -25,6 +25,13 @@ async function addFeed(url = URL_A): Promise<void> {
   field.dispatchEvent(new Event('input', { bubbles: true }));
   await flush();
   await clickButton(host, 'Abonnieren');
+  // Grosse Feeds brauchen laenger als eine feste Wartezeit; hier zaehlt das
+  // Ergebnis, nicht die verstrichene Zeit. Ein abgelehnter Feed endet in einer
+  // Fehlerzeile — auch das ist ein Ergebnis.
+  await waitFor(
+    () => host.querySelector('.subscription') !== null || host.querySelector('.wallet-error') !== null,
+    { timeoutMs: 3000 },
+  );
 }
 
 beforeEach(async () => {
@@ -45,7 +52,7 @@ describe('FR-07, FR-09: Abonnieren und Abo-Liste', () => {
     await addFeed();
 
     expect(host.textContent).toContain('Testpodcast');
-    expect(host.querySelector('img.cover')?.getAttribute('src')).toBe(
+    expect(host.querySelector('img.art')?.getAttribute('src')).toBe(
       'https://example.com/cover.jpg',
     );
     expect(host.textContent).toContain('Folge 2');
@@ -119,7 +126,7 @@ describe('FR-09: Anzahl in der Abo-Zeile', () => {
 
     const zeile = host.querySelector('.subscription')?.textContent ?? '';
     expect(zeile).toContain('70 Episoden');
-    expect(host.querySelectorAll('.episodes li')).toHaveLength(EPISODES_VISIBLE);
+    expect(host.querySelectorAll('.episodes button')).toHaveLength(EPISODES_VISIBLE);
   });
 });
 
@@ -143,7 +150,7 @@ describe('FR-10: Episodenliste', () => {
     await mount(serve(feedMitEpisoden(70)));
     await addFeed();
 
-    expect(host.querySelectorAll('.episodes li')).toHaveLength(EPISODES_VISIBLE);
+    expect(host.querySelectorAll('.episodes button')).toHaveLength(EPISODES_VISIBLE);
   });
 
   it('US-02-AC-1: haelt die Reihenfolge absteigend nach Datum', async () => {

@@ -4,7 +4,26 @@ import { npubEncode } from 'nostr-tools/nip19';
 import { closeDatabase } from '../../src/db/database.js';
 import { resetDatabase } from '../helpers/db.js';
 import { clickButton, flush } from '../helpers/ui.js';
-import { IdentityBar } from '../../src/ui/identity-bar.js';
+import {
+  IdentityControl,
+  IdentityNotices,
+  useIdentity,
+} from '../../src/ui/identity-bar.js';
+
+/**
+ * Testhuelle: Der Entwurf setzt das Bedienelement in die Navigationszeile und
+ * die Hinweise darunter. Hier stehen beide zusammen, damit die Tests dasselbe
+ * Verhalten pruefen wie vor der Aufteilung.
+ */
+function IdentityBar() {
+  const identity = useIdentity();
+  return (
+    <>
+      <IdentityControl identity={identity} />
+      <IdentityNotices identity={identity} />
+    </>
+  );
+}
 
 const PUBKEY_HEX = '3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d';
 const NPUB = npubEncode(PUBKEY_HEX);

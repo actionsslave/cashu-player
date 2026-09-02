@@ -49,10 +49,12 @@ afterEach(async () => {
 });
 
 describe('FR-15: Guthaben anzeigen', () => {
-  it('zeigt das Guthaben in Sat', async () => {
+  it('zeigt das Guthaben gross auf der Seite, mit der Einheit daneben', async () => {
     await seedProofs([500]);
     await mount(makeWallet());
-    expect(host.textContent).toContain('500 Sat');
+    // Entwurf 1d: die Zahl ist die Seite, "Sat" steht als eigener Block daneben.
+    expect(host.querySelector('.balance-amount')?.textContent).toBe('500');
+    expect(host.querySelector('.balance-unit')?.textContent).toContain('Sat');
   });
 });
 
@@ -126,7 +128,10 @@ describe('FR-19: Verlauf', () => {
     await mount(makeWallet());
     await typeToken(encodeToken(ERLAUBT, [500]));
     await clickButton(host, 'Aufladen');
-    const history = host.querySelector('.history')?.textContent ?? '';
+    const history = host.querySelector('.history-block')?.textContent ?? '';
     expect(history).toContain('500');
+    // FR-19: Richtung, Art und Status stehen als eigene Spalten in der Tabelle.
+    expect(history).toContain('+500 Sat');
+    expect(history).toContain('Aufladung');
   });
 });

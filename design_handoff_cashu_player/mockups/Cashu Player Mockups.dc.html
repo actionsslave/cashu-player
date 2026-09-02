@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics=""><meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/broadsheet-9810c4cb-2d7d-4485-8f90-b9dcd31d14bb/styles.css">
+<script src="_ds/broadsheet-9810c4cb-2d7d-4485-8f90-b9dcd31d14bb/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:#e4e2df;font-family:var(--font-body)}
+.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#201e1d;color:#f3f2f2;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 13px/1.2 var(--font-heading);color:#201e1d}
+.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#201e1d;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11.5px/1.3 var(--font-body);color:rgba(32,30,29,.6)}
+.dv-card{max-width:100%;background:var(--color-bg);box-shadow:0 1px 3px rgba(0,0,0,.10);overflow:hidden}
+.dv-opt:target .dv-oid{background:var(--color-accent);color:#f3f2f2}
+.dv-next{margin:22px 0 0;font:12px/1.5 var(--font-body);color:rgba(32,30,29,.55)}
+a{color:var(--color-accent)}a:hover{color:var(--color-accent-600)}
+.ph{background:var(--color-neutral-300);display:grid;place-items:center;color:var(--color-neutral-600);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.ep{color:var(--color-accent-700);text-decoration:none;font-size:15px}
+.ep:hover{color:var(--color-accent-800);text-decoration:underline}
+.qr{background-image:conic-gradient(from 90deg at 50% 50%,#201e1d 25%,transparent 0 50%,#201e1d 0 75%,transparent 0);background-size:9px 9px;position:relative}
+.qr i{position:absolute;width:27px;height:27px;border:6px solid #201e1d;background:var(--color-bg);box-shadow:inset 0 0 0 5px var(--color-bg),inset 0 0 0 11px #201e1d}
+</style></helmet>
+
+<section class="dv-turn" id="t3">
+<div class="dv-thd"><a class="dv-tid" href="#t3">3</a><span class="dv-tname">States — what <a class="dv-oid" href="#1a">1a</a> prints when streaming can't run</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="3a"><div class="dv-olabel"><a class="dv-oid" href="#3a">3a</a>Blocked — the feed carries no value block, so there is nowhere to send</div>
+<div class="dv-card" style="width:1280px">
+  <div style="height:3px;background:var(--color-text)"></div>
+  <div class="nav" style="padding:13px 44px">
+    <span class="nav-brand" style="font-size:19px">Cashu Player</span>
+    <div style="display:flex;gap:24px;margin-right:auto">
+      <a href="#3a" aria-current="page">Listen</a><a href="#1d">Wallet</a><a href="#3a">Settings</a>
+    </div>
+    <span style="font-size:13px;color:var(--color-neutral-700)">412 sat</span>
+    <span style="font-size:13px;color:var(--color-neutral-700);font-variant-numeric:tabular-nums">npub1n0dev…u02cy</span>
+  </div>
+  <div style="height:1px;background:var(--color-divider)"></div>
+  <div style="padding:34px 44px 38px;display:flex;gap:32px;align-items:flex-start">
+    <div class="ph halftone" style="width:196px;height:196px;flex:none">Cover</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent);margin-bottom:7px">Now playing · Der Bitcoin Effekt</div>
+      <h1 style="font-size:46px;margin:0 0 4px">Folge 96</h1>
+      <p class="text-muted" style="font-size:14px;margin:0 0 22px">Episode 96 · 54:20 · not sats streaming</p>
+      <div style="height:4px;background:var(--color-neutral-300);margin-bottom:8px"><div style="width:8%;height:100%;background:var(--color-accent)"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700);margin-bottom:20px">
+        <span>00:04:21</span><span>−00:49:59</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn btn-secondary" type="button">−15 s</button>
+        <button class="btn btn-primary" type="button" style="padding-inline:26px">Pause</button>
+        <button class="btn btn-secondary" type="button">+30 s</button>
+        <select class="input" style="width:auto;margin-left:6px"><option>1×</option><option>1,2×</option><option>1,5×</option><option>2×</option></select>
+        <button class="btn" type="button" disabled="true" style="margin-left:auto;background:var(--color-text);color:var(--color-bg);padding-inline:24px">Boost</button>
+      </div>
+    </div>
+    <div style="width:212px;flex:none;padding-left:28px;border-left:1px solid var(--color-divider)">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-2);margin-bottom:10px">No payment address</div>
+      <p style="font-family:var(--font-heading);font-size:19px;line-height:1.25;margin:0 0 10px">This feed publishes no value block.</p>
+      <p class="text-muted" style="font-size:13px;margin:0 0 14px">Playback works. Nothing is streamed and boosts are off until the show adds a nutzap or Lightning address.</p>
+      <a href="#3a" style="font-size:13px;color:var(--color-accent-700)">What is a value block?</a>
+    </div>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="3b"><div class="dv-olabel"><a class="dv-oid" href="#3b">3b</a>Low balance — 18 sat left, streaming stops in under two minutes</div>
+<div class="dv-card" style="width:1280px">
+  <div style="height:3px;background:var(--color-text)"></div>
+  <div class="nav" style="padding:13px 44px">
+    <span class="nav-brand" style="font-size:19px">Cashu Player</span>
+    <div style="display:flex;gap:24px;margin-right:auto">
+      <a href="#3b" aria-current="page">Listen</a><a href="#1d">Wallet</a><a href="#3b">Settings</a>
+    </div>
+    <span style="font-size:13px;color:var(--color-accent-2);font-weight:600">18 sat</span>
+    <span style="font-size:13px;color:var(--color-neutral-700);font-variant-numeric:tabular-nums">npub1n0dev…u02cy</span>
+  </div>
+  <div style="height:1px;background:var(--color-divider)"></div>
+  <div style="padding:34px 44px 38px;display:flex;gap:32px;align-items:flex-start">
+    <div class="ph halftone" style="width:196px;height:196px;flex:none">Cover</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent);margin-bottom:7px">Now playing · Nodesignal</div>
+      <h1 style="font-size:46px;margin:0 0 4px">Keine Angst</h1>
+      <p class="text-muted" style="font-size:14px;margin:0 0 22px">Episode 412 · 1:12:40 · streaming 10 sat/min</p>
+      <div style="height:4px;background:var(--color-neutral-300);margin-bottom:8px"><div style="width:19.4%;height:100%;background:var(--color-accent)"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700);margin-bottom:20px">
+        <span>00:14:07</span><span>−00:58:33</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn btn-secondary" type="button">−15 s</button>
+        <button class="btn btn-primary" type="button" style="padding-inline:26px">Pause</button>
+        <button class="btn btn-secondary" type="button">+30 s</button>
+        <select class="input" style="width:auto;margin-left:6px"><option>1×</option><option>1,2×</option><option>1,5×</option><option>2×</option></select>
+        <button class="btn" type="button" style="margin-left:auto;background:var(--color-text);color:var(--color-bg);padding-inline:24px">Boost</button>
+      </div>
+    </div>
+    <div style="width:212px;flex:none;padding-left:28px;border-left:1px solid var(--color-divider)">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-2);margin-bottom:10px">Running out</div>
+      <div style="font-family:var(--font-heading);font-weight:600;font-size:38px;line-height:1;font-variant-numeric:tabular-nums;color:var(--color-accent-2)">18 <span style="font-size:17px;font-weight:400">sat</span></div>
+      <p class="text-muted" style="font-size:13px;margin:8px 0 14px">Streaming stops at 00:15:55. Playback continues.</p>
+      <a class="btn btn-primary btn-block" href="#1d" style="margin-bottom:9px">Top up</a>
+      <p class="text-muted" style="font-size:12px;margin:0">Boosts above 18 sat are unavailable.</p>
+    </div>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="3c"><div class="dv-olabel"><a class="dv-oid" href="#3c">3c</a>No key — plays without a wallet, payment is the thing that needs signing in</div>
+<div class="dv-card" style="width:1280px">
+  <div style="height:3px;background:var(--color-text)"></div>
+  <div class="nav" style="padding:13px 44px">
+    <span class="nav-brand" style="font-size:19px">Cashu Player</span>
+    <div style="display:flex;gap:24px;margin-right:auto">
+      <a href="#3c" aria-current="page">Listen</a><a href="#3c">Wallet</a><a href="#3c">Settings</a>
+    </div>
+    <button class="btn btn-secondary" type="button" style="padding:5px 14px;font-size:13px">Connect nostr key</button>
+  </div>
+  <div style="height:1px;background:var(--color-divider)"></div>
+  <div style="padding:34px 44px 38px;display:flex;gap:32px;align-items:flex-start">
+    <div class="ph halftone" style="width:196px;height:196px;flex:none">Cover</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent);margin-bottom:7px">Now playing · Nodesignal</div>
+      <h1 style="font-size:46px;margin:0 0 4px">Keine Angst</h1>
+      <p class="text-muted" style="font-size:14px;margin:0 0 22px">Episode 412 · 1:12:40 · listening only</p>
+      <div style="height:4px;background:var(--color-neutral-300);margin-bottom:8px"><div style="width:19.4%;height:100%;background:var(--color-accent)"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700);margin-bottom:20px">
+        <span>00:14:07</span><span>−00:58:33</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn btn-secondary" type="button">−15 s</button>
+        <button class="btn btn-primary" type="button" style="padding-inline:26px">Pause</button>
+        <button class="btn btn-secondary" type="button">+30 s</button>
+        <select class="input" style="width:auto;margin-left:6px"><option>1×</option><option>1,2×</option><option>1,5×</option><option>2×</option></select>
+        <button class="btn" type="button" disabled="true" style="margin-left:auto;background:var(--color-text);color:var(--color-bg);padding-inline:24px">Boost</button>
+      </div>
+    </div>
+    <div style="width:212px;flex:none;padding-left:28px;border-left:1px solid var(--color-divider)">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:10px">Not signed in</div>
+      <p style="font-family:var(--font-heading);font-size:19px;line-height:1.25;margin:0 0 10px">Connect a nostr key to pay shows.</p>
+      <p class="text-muted" style="font-size:13px;margin:0 0 14px">The key holds your Cashu wallet and signs each nutzap. Subscriptions stay on this device either way.</p>
+      <button class="btn btn-primary btn-block" type="button" style="margin-bottom:9px">Connect key</button>
+      <button class="btn btn-ghost btn-block" type="button">Create one</button>
+    </div>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="3d"><div class="dv-olabel"><a class="dv-oid" href="#3d">3d</a>Empty — nothing subscribed, the page is the subscribe field</div>
+<div class="dv-card" style="width:1280px">
+  <div style="height:3px;background:var(--color-text)"></div>
+  <div class="nav" style="padding:13px 44px">
+    <span class="nav-brand" style="font-size:19px">Cashu Player</span>
+    <div style="display:flex;gap:24px;margin-right:auto">
+      <a href="#3d" aria-current="page">Listen</a><a href="#1d">Wallet</a><a href="#3d">Settings</a>
+    </div>
+    <span style="font-size:13px;color:var(--color-neutral-700)">412 sat</span>
+    <span style="font-size:13px;color:var(--color-neutral-700);font-variant-numeric:tabular-nums">npub1n0dev…u02cy</span>
+  </div>
+  <div style="height:1px;background:var(--color-divider)"></div>
+  <div style="padding:64px 44px 84px;max-width:640px">
+    <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent);margin-bottom:12px">Nothing playing</div>
+    <h1 style="font-size:52px;line-height:1.05;margin:0 0 12px;text-wrap:pretty">Paste a feed to start listening.</h1>
+    <p class="text-muted" style="font-size:15px;margin:0 0 26px;text-wrap:pretty">Any RSS address works. Shows that publish a value block are paid per minute from your wallet; the rest just play.</p>
+    <div style="display:flex;gap:16px;margin-bottom:20px">
+      <input class="input" type="url" placeholder="https://…/rss">
+      <button class="btn btn-primary" type="button" style="white-space:nowrap">Subscribe</button>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:10px;font-size:13px">
+      <span class="text-muted">or</span>
+      <a href="#3d" style="color:var(--color-accent-700)">import an OPML file</a>
+    </div>
+  </div>
+</div></div>
+
+</div>
+<p class="dv-next">Try next: “<a class="dv-oid" href="#3b">3b</a> should pause playback too” · “add the streaming-paused-by-me state” · “show a failed nutzap”</p>
+</section>
+
+<section class="dv-turn" id="t2">
+<div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Boost button alternatives on <a class="dv-oid" href="#1a">1a</a> — the now-playing block, everything else held constant · <a class="dv-oid" href="#2a">2a</a> chosen, now in <a class="dv-oid" href="#1a">1a</a></span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="2a"><div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>Full-strength ink — solid black, the loudest thing the system prints</div>
+<div class="dv-card" style="width:1280px">
+  <div style="padding:34px 44px 30px;display:flex;gap:32px;align-items:flex-start">
+    <div class="ph halftone" style="width:196px;height:196px;flex:none">Cover</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent);margin-bottom:7px">Now playing · Nodesignal</div>
+      <h1 style="font-size:46px;margin:0 0 4px">Keine Angst</h1>
+      <p class="text-muted" style="font-size:14px;margin:0 0 22px">Episode 412 · 1:12:40 · streaming 10 sat/min</p>
+      <div style="height:4px;background:var(--color-neutral-300);margin-bottom:8px"><div style="width:19.4%;height:100%;background:var(--color-accent)"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700);margin-bottom:20px">
+        <span>00:14:07</span><span>−00:58:33</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn btn-secondary" type="button">−15 s</button>
+        <button class="btn btn-primary" type="button" style="padding-inline:26px">Pause</button>
+        <button class="btn btn-secondary" type="button">+30 s</button>
+        <select class="input" style="width:auto;margin-left:6px"><option>1×</option><option>1,2×</option><option>1,5×</option><option>2×</option></select>
+        <button class="btn" type="button" style="margin-left:auto;background:var(--color-text);color:var(--color-bg);padding-inline:24px">Boost</button>
+      </div>
+    </div>
+    <div style="width:212px;flex:none;padding-left:28px;border-left:1px solid var(--color-divider)">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:10px">This session</div>
+      <div style="font-family:var(--font-heading);font-weight:600;font-size:38px;line-height:1;font-variant-numeric:tabular-nums">40 <span style="font-size:17px;font-weight:400">sat</span></div>
+      <p class="text-muted" style="font-size:13px;margin:8px 0 14px">sent in 4 nutzaps</p>
+      <div style="font-size:13px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">6 sat pending</div>
+    </div>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="2b"><div class="dv-olabel"><a class="dv-oid" href="#2b">2b</a>Cyan outline — one accent, boost reads as a peer of the transport controls</div>
+<div class="dv-card" style="width:1280px">
+  <div style="padding:34px 44px 30px;display:flex;gap:32px;align-items:flex-start">
+    <div class="ph halftone" style="width:196px;height:196px;flex:none">Cover</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent);margin-bottom:7px">Now playing · Nodesignal</div>
+      <h1 style="font-size:46px;margin:0 0 4px">Keine Angst</h1>
+      <p class="text-muted" style="font-size:14px;margin:0 0 22px">Episode 412 · 1:12:40 · streaming 10 sat/min</p>
+      <div style="height:4px;background:var(--color-neutral-300);margin-bottom:8px"><div style="width:19.4%;height:100%;background:var(--color-accent)"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700);margin-bottom:20px">
+        <span>00:14:07</span><span>−00:58:33</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn btn-secondary" type="button">−15 s</button>
+        <button class="btn btn-primary" type="button" style="padding-inline:26px">Pause</button>
+        <button class="btn btn-secondary" type="button">+30 s</button>
+        <select class="input" style="width:auto;margin-left:6px"><option>1×</option><option>1,2×</option><option>1,5×</option><option>2×</option></select>
+        <button class="btn" type="button" style="margin-left:auto;border-color:var(--color-accent);color:var(--color-accent-700);padding-inline:24px">Boost</button>
+      </div>
+    </div>
+    <div style="width:212px;flex:none;padding-left:28px;border-left:1px solid var(--color-divider)">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:10px">This session</div>
+      <div style="font-family:var(--font-heading);font-weight:600;font-size:38px;line-height:1;font-variant-numeric:tabular-nums">40 <span style="font-size:17px;font-weight:400">sat</span></div>
+      <p class="text-muted" style="font-size:13px;margin:8px 0 14px">sent in 4 nutzaps</p>
+      <div style="font-size:13px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">6 sat pending</div>
+    </div>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="2c"><div class="dv-olabel"><a class="dv-oid" href="#2c">2c</a>Standing headline — not a button at all, a ruled line in the serif</div>
+<div class="dv-card" style="width:1280px">
+  <div style="padding:34px 44px 30px;display:flex;gap:32px;align-items:flex-start">
+    <div class="ph halftone" style="width:196px;height:196px;flex:none">Cover</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent);margin-bottom:7px">Now playing · Nodesignal</div>
+      <h1 style="font-size:46px;margin:0 0 4px">Keine Angst</h1>
+      <p class="text-muted" style="font-size:14px;margin:0 0 22px">Episode 412 · 1:12:40 · streaming 10 sat/min</p>
+      <div style="height:4px;background:var(--color-neutral-300);margin-bottom:8px"><div style="width:19.4%;height:100%;background:var(--color-accent)"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700);margin-bottom:20px">
+        <span>00:14:07</span><span>−00:58:33</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn btn-secondary" type="button">−15 s</button>
+        <button class="btn btn-primary" type="button" style="padding-inline:26px">Pause</button>
+        <button class="btn btn-secondary" type="button">+30 s</button>
+        <select class="input" style="width:auto;margin-left:6px"><option>1×</option><option>1,2×</option><option>1,5×</option><option>2×</option></select>
+      </div>
+    </div>
+    <div style="width:212px;flex:none;padding-left:28px;border-left:1px solid var(--color-divider)">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:10px">This session</div>
+      <div style="font-family:var(--font-heading);font-weight:600;font-size:38px;line-height:1;font-variant-numeric:tabular-nums">40 <span style="font-size:17px;font-weight:400">sat</span></div>
+      <p class="text-muted" style="font-size:13px;margin:8px 0 18px">sent in 4 nutzaps</p>
+      <button class="btn" type="button" style="padding:0;display:block;text-align:left;font-size:22px;line-height:1.1;color:var(--color-text);border:0;border-bottom:2px solid var(--color-accent);border-radius:0;padding-bottom:5px">Boost this moment</button>
+      <p class="text-muted" style="font-size:12px;margin:9px 0 0;font-variant-numeric:tabular-nums">210 sat · 00:14:07</p>
+    </div>
+  </div>
+</div></div>
+
+</div>
+<p class="dv-next">Try next: “<a class="dv-oid" href="#2a">2a</a>, and put it in full <a class="dv-oid" href="#1a">1a</a>” · “<a class="dv-oid" href="#2c">2c</a> but keep a real button” · “now the blocked and low-balance states”</p>
+</section>
+
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Cashu Player — Listen, Wallet, Boost · 1280px · Broadsheet</span></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a"><div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Listen — single column, counter as a ledger line, balance in the chrome</div>
+<div class="dv-card" style="width:1280px">
+  <div style="height:3px;background:var(--color-text)"></div>
+  <div class="nav" style="padding:13px 44px">
+    <span class="nav-brand" style="font-size:19px">Cashu Player</span>
+    <div style="display:flex;gap:24px;margin-right:auto">
+      <a href="#1a" aria-current="page">Listen</a><a href="#1d">Wallet</a><a href="#1a">Settings</a>
+    </div>
+    <span style="font-size:13px;color:var(--color-neutral-700)">412 sat</span>
+    <span style="font-size:13px;color:var(--color-neutral-700);font-variant-numeric:tabular-nums">npub1n0dev…u02cy</span>
+  </div>
+  <div style="height:1px;background:var(--color-divider)"></div>
+
+  <div style="padding:34px 44px 30px;display:flex;gap:32px;align-items:flex-start">
+    <div class="ph halftone" style="width:196px;height:196px;flex:none">Cover</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent);margin-bottom:7px">Now playing · Nodesignal</div>
+      <h1 style="font-size:46px;margin:0 0 4px">Keine Angst</h1>
+      <p class="text-muted" style="font-size:14px;margin:0 0 22px">Episode 412 · 1:12:40 · streaming 10 sat/min</p>
+
+      <div style="height:4px;background:var(--color-neutral-300);margin-bottom:8px"><div style="width:19.4%;height:100%;background:var(--color-accent)"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700);margin-bottom:20px">
+        <span>00:14:07</span><span>−00:58:33</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn btn-secondary" type="button">−15 s</button>
+        <button class="btn btn-primary" type="button" style="padding-inline:26px">Pause</button>
+        <button class="btn btn-secondary" type="button">+30 s</button>
+        <select class="input" style="width:auto;margin-left:6px"><option>1×</option><option>1,2×</option><option>1,5×</option><option>2×</option></select>
+        <button class="btn" type="button" style="margin-left:auto;background:var(--color-text);color:var(--color-bg);padding-inline:24px">Boost</button>
+      </div>
+    </div>
+    <div style="width:212px;flex:none;padding-left:28px;border-left:1px solid var(--color-divider)">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:10px">This session</div>
+      <div style="font-family:var(--font-heading);font-weight:600;font-size:38px;line-height:1;font-variant-numeric:tabular-nums">40 <span style="font-size:17px;font-weight:400">sat</span></div>
+      <p class="text-muted" style="font-size:13px;margin:8px 0 14px">sent in 4 nutzaps</p>
+      <div style="font-size:13px;font-variant-numeric:tabular-nums;color:var(--color-accent-2)">6 sat pending</div>
+      <p class="text-muted" style="font-size:12px;margin:6px 0 0">Below 1 sat carries into the next minute.</p>
+    </div>
+  </div>
+
+  <div style="padding:0 44px 44px">
+    <h2 style="font-size:26px;margin:0 0 3px">Subscriptions</h2>
+    <p class="text-muted" style="font-size:13px;margin:0 0 20px">Three newest episodes each. Titles only — feed descriptions are raw HTML.</p>
+
+    <div style="display:flex;gap:16px;margin-bottom:26px;max-width:520px">
+      <input class="input" type="url" placeholder="https://…/rss">
+      <button class="btn btn-primary" type="button" style="white-space:nowrap">Subscribe</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:34px">
+      <div>
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px">
+          <div class="ph halftone" style="width:52px;height:52px;flex:none;font-size:9px">Art</div>
+          <div>
+            <h4 style="margin:0 0 2px;font-size:19px">Nodesignal</h4>
+            <div class="text-muted" style="font-size:12px">412 episodes</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <a class="ep" href="#1a" style="color:var(--color-text);font-weight:600">Keine Angst</a>
+          <a class="ep" href="#1a">Nodesignal-Talk #234 — Selbstverwahrung</a>
+          <a class="ep" href="#1a">Nodesignal-Update #187</a>
+        </div>
+      </div>
+      <div>
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px">
+          <div class="ph halftone" style="width:52px;height:52px;flex:none;font-size:9px">Art</div>
+          <div>
+            <h4 style="margin:0 0 2px;font-size:19px">Einundzwanzig</h4>
+            <div class="text-muted" style="font-size:12px">189 episodes · <span class="tag tag-neutral">via proxy</span></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <a class="ep" href="#1a">Was ist Geld?</a>
+          <a class="ep" href="#1a">Die Rückkehr der Zeitpräferenz</a>
+          <a class="ep" href="#1a">Sound Money, Sound Mind</a>
+        </div>
+      </div>
+      <div>
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px">
+          <div class="ph halftone" style="width:52px;height:52px;flex:none;font-size:9px">Art</div>
+          <div>
+            <h4 style="margin:0 0 2px;font-size:19px">Honigdachs</h4>
+            <div class="text-muted" style="font-size:12px">78 episodes</div>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--color-accent-2-700);margin:0 0 12px">No payments: this feed carries no nostr identity. Playback works.</p>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <a class="ep" href="#1a">Folge 214 — Bienen und Bitcoin</a>
+          <a class="ep" href="#1a">Folge 213 — Der lange Winter</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="1b"><div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Listen — two columns, counter as a live nutzap ledger, boost inline, wallet in the rail</div>
+<div class="dv-card" style="width:1280px">
+  <div style="height:3px;background:var(--color-text)"></div>
+  <div class="nav" style="padding:13px 44px">
+    <span class="nav-brand" style="font-size:19px">Cashu Player</span>
+    <div style="display:flex;gap:24px;margin-right:auto">
+      <a href="#1b" aria-current="page">Listen</a><a href="#1d">Wallet</a><a href="#1b">Settings</a>
+    </div>
+    <span style="font-size:13px;color:var(--color-neutral-700);font-variant-numeric:tabular-nums">npub1n0dev…u02cy</span>
+  </div>
+  <div style="height:1px;background:var(--color-divider)"></div>
+
+  <div style="padding:30px 44px 26px;display:flex;gap:28px;align-items:center">
+    <div class="ph halftone" style="width:132px;height:132px;flex:none">Cover</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent);margin-bottom:6px">Nodesignal</div>
+      <h1 style="font-size:40px;margin:0 0 16px">Keine Angst</h1>
+      <div style="height:4px;background:var(--color-neutral-300);margin-bottom:7px"><div style="width:19.4%;height:100%;background:var(--color-accent)"></div></div>
+      <div style="display:flex;align-items:center;gap:14px;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">
+        <span>00:14:07</span><span style="flex:1"></span><span>1:12:40</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px;flex:none">
+      <button class="btn btn-secondary" type="button">−15 s</button>
+      <button class="btn btn-primary" type="button" style="padding-inline:24px">Pause</button>
+      <button class="btn btn-secondary" type="button">+30 s</button>
+      <select class="input" style="width:auto"><option>1×</option><option>1,5×</option><option>2×</option></select>
+    </div>
+  </div>
+  <div style="height:1px;background:var(--color-divider);margin:0 44px"></div>
+
+  <div style="display:grid;grid-template-columns:1fr 356px;gap:44px;padding:28px 44px 44px">
+    <div>
+      <h2 style="font-size:26px;margin:0 0 18px">Subscriptions</h2>
+      <div style="display:flex;gap:14px;margin-bottom:26px;max-width:460px">
+        <input class="input" type="url" placeholder="https://…/rss">
+        <button class="btn btn-primary" type="button" style="white-space:nowrap">Subscribe</button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <div style="display:flex;gap:16px">
+          <div class="ph halftone" style="width:64px;height:64px;flex:none;font-size:9px">Art</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+              <h4 style="margin:0;font-size:20px">Nodesignal</h4>
+              <span class="text-muted" style="font-size:12px">412 episodes</span>
+              <span class="tag tag-accent" style="margin-left:auto">paying</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <a class="ep" href="#1b" style="color:var(--color-text);font-weight:600">Keine Angst</a>
+              <a class="ep" href="#1b">Nodesignal-Talk #234 — Selbstverwahrung</a>
+              <a class="ep" href="#1b">Nodesignal-Update #187</a>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px">
+          <div class="ph halftone" style="width:64px;height:64px;flex:none;font-size:9px">Art</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+              <h4 style="margin:0;font-size:20px">Einundzwanzig</h4>
+              <span class="text-muted" style="font-size:12px">189 episodes</span>
+              <span class="tag tag-neutral" style="margin-left:auto">via proxy</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <a class="ep" href="#1b">Was ist Geld?</a>
+              <a class="ep" href="#1b">Die Rückkehr der Zeitpräferenz</a>
+              <a class="ep" href="#1b">Sound Money, Sound Mind</a>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px">
+          <div class="ph halftone" style="width:64px;height:64px;flex:none;font-size:9px">Art</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+              <h4 style="margin:0;font-size:20px">Honigdachs</h4>
+              <span class="text-muted" style="font-size:12px">78 episodes</span>
+              <span class="tag tag-accent-2" style="margin-left:auto">no recipient</span>
+            </div>
+            <p style="font-size:13px;color:var(--color-accent-2-700);margin:0 0 8px">The feed carries no nostr identity, so streaming and boost stay off.</p>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <a class="ep" href="#1b">Folge 214 — Bienen und Bitcoin</a>
+              <a class="ep" href="#1b">Folge 213 — Der lange Winter</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px">
+        <h2 style="font-size:26px;margin:0">412 <span style="font-size:15px;font-weight:400" class="text-muted">sat in wallet</span></h2>
+        <a href="#1d" style="font-size:13px">Wallet</a>
+      </div>
+      <p class="text-muted" style="font-size:12px;margin:0 0 26px">Storage: persistent · mint.minibits.cash</p>
+
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:12px">Sent this session</div>
+      <div style="display:flex;flex-direction:column;gap:0;font-variant-numeric:tabular-nums;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+          <span style="font-size:14px">10 sat</span><span class="text-muted" style="font-size:12px">00:14:00</span><span class="tag tag-accent">confirmed</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+          <span style="font-size:14px">10 sat</span><span class="text-muted" style="font-size:12px">00:13:00</span><span class="tag tag-accent">confirmed</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+          <span style="font-size:14px">10 sat</span><span class="text-muted" style="font-size:12px">00:12:00</span><span class="tag tag-accent">confirmed</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+          <span style="font-size:14px">10 sat</span><span class="text-muted" style="font-size:12px">00:11:00</span><span class="tag tag-neutral">pending</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 0">
+          <span style="font-size:14px;color:var(--color-neutral-600)">6 sat</span><span class="text-muted" style="font-size:12px">accruing</span><span class="text-muted" style="font-size:12px">36 s to go</span>
+        </div>
+      </div>
+      <div style="height:3px;background:var(--color-neutral-300);margin-bottom:32px"><div style="width:60%;height:100%;background:var(--color-accent-2)"></div></div>
+
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:12px">Boost this moment · 00:14:07</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="btn" type="button" style="flex:1;background:var(--color-accent-2);color:var(--color-bg)">210</button>
+        <button class="btn btn-secondary" type="button" style="flex:1" disabled="true">2 100</button>
+        <button class="btn btn-secondary" type="button" style="flex:1" disabled="true">4 200</button>
+        <button class="btn btn-secondary" type="button" style="flex:1" disabled="true">21 000</button>
+      </div>
+      <textarea class="input" style="min-height:64px;margin-bottom:6px">Strong episode</textarea>
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:12px">
+        <span class="text-muted">266 characters left</span>
+        <span class="text-muted">timecode appended</span>
+      </div>
+      <button class="btn btn-block" type="button" style="background:var(--color-accent-2);color:var(--color-bg);margin:0">Send 210 sat</button>
+    </div>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="1c"><div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Listen — press sheet: counter as a process plate, boost as an amount gauge</div>
+<div class="dv-card" style="width:1280px">
+  <div style="height:3px;background:var(--color-text)"></div>
+  <div class="nav" style="padding:11px 44px">
+    <span class="nav-brand" style="font-size:15px;letter-spacing:.06em;text-transform:uppercase">Cashu Player</span>
+    <div style="display:flex;gap:22px;margin-right:auto;font-size:13px">
+      <a href="#1c" aria-current="page">Listen</a><a href="#1d">Wallet</a><a href="#1c">Settings</a>
+    </div>
+    <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--color-neutral-700)">10 sat / min</span>
+    <span style="font-size:12px;color:var(--color-neutral-700);font-variant-numeric:tabular-nums">412 sat · npub1n0dev…u02cy</span>
+  </div>
+  <div style="height:1px;background:var(--color-divider)"></div>
+
+  <div style="padding:40px 44px 34px;display:grid;grid-template-columns:1fr 380px;gap:52px;align-items:start">
+    <div>
+      <div style="display:flex;gap:28px;align-items:flex-start;margin-bottom:26px">
+        <div class="ph halftone" style="width:150px;height:150px;flex:none">Cover</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:8px">Nodesignal · Episode 412</div>
+          <h1 class="cmyk-head" style="font-size:60px;margin:0 0 14px;line-height:1">
+            <span class="paper">Keine Angst</span>
+            <span class="plate plate-c" aria-hidden="true">Keine Angst</span>
+            <span class="plate plate-m" aria-hidden="true">Keine Angst</span>
+            <span class="plate plate-y" aria-hidden="true">Keine Angst</span>
+          </h1>
+          <div style="height:6px;background:var(--color-neutral-300);margin-bottom:8px"><div style="width:19.4%;height:100%;background:var(--color-text)"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">
+            <span>00:14:07</span><span>1:12:40</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:36px">
+        <button class="btn btn-secondary" type="button">−15 s</button>
+        <button class="btn btn-primary" type="button" style="padding-inline:28px">Pause</button>
+        <button class="btn btn-secondary" type="button">+30 s</button>
+        <div class="seg" style="margin-left:8px">
+          <label class="seg-opt"><input type="radio" name="rate-1c" checked="">1×</label>
+          <label class="seg-opt"><input type="radio" name="rate-1c">1,5×</label>
+          <label class="seg-opt"><input type="radio" name="rate-1c">2×</label>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--color-divider);margin-bottom:26px"></div>
+      <h2 style="font-size:24px;margin:0 0 16px">Subscriptions</h2>
+      <div style="display:flex;gap:14px;margin-bottom:24px;max-width:440px">
+        <input class="input" type="url" placeholder="https://…/rss">
+        <button class="btn btn-secondary" type="button" style="white-space:nowrap">Subscribe</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px 34px">
+        <div>
+          <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:9px">
+            <h4 style="margin:0;font-size:18px">Nodesignal</h4><span class="text-muted" style="font-size:12px">412</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <a class="ep" href="#1c" style="color:var(--color-text);font-weight:600;font-size:14px">Keine Angst</a>
+            <a class="ep" href="#1c" style="font-size:14px">Nodesignal-Talk #234 — Selbstverwahrung</a>
+            <a class="ep" href="#1c" style="font-size:14px">Nodesignal-Update #187</a>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:9px">
+            <h4 style="margin:0;font-size:18px">Einundzwanzig</h4><span class="text-muted" style="font-size:12px">189</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <a class="ep" href="#1c" style="font-size:14px">Was ist Geld?</a>
+            <a class="ep" href="#1c" style="font-size:14px">Die Rückkehr der Zeitpräferenz</a>
+            <a class="ep" href="#1c" style="font-size:14px">Sound Money, Sound Mind</a>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:9px">
+            <h4 style="margin:0;font-size:18px">Honigdachs</h4><span class="text-muted" style="font-size:12px">78</span>
+          </div>
+          <p style="font-size:12.5px;color:var(--color-accent-2-700);margin:0 0 8px">No nostr identity in the feed — payments off.</p>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <a class="ep" href="#1c" style="font-size:14px">Folge 214 — Bienen und Bitcoin</a>
+            <a class="ep" href="#1c" style="font-size:14px">Folge 213 — Der lange Winter</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:16px">Sent this session</div>
+      <div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:18px">
+        <div class="cmyk-num" style="font-family:var(--font-heading);font-weight:600;font-size:104px">
+          <span class="paper">40</span>
+          <span class="plate plate-c" aria-hidden="true">40</span>
+          <span class="plate plate-m" aria-hidden="true">40</span>
+          <span class="plate plate-y" aria-hidden="true">40</span>
+        </div>
+        <div style="font-family:var(--font-heading);font-weight:600;font-size:22px;padding-bottom:8px">sat</div>
+      </div>
+
+      <div style="display:flex;gap:4px;margin-bottom:8px">
+        <div style="flex:1;height:26px;background:var(--color-accent)"></div>
+        <div style="flex:1;height:26px;background:var(--color-accent)"></div>
+        <div style="flex:1;height:26px;background:var(--color-accent)"></div>
+        <div style="flex:1;height:26px;background:var(--color-accent)"></div>
+        <div style="flex:1;height:26px;background:var(--color-accent-2);opacity:.6"></div>
+        <div style="flex:1;height:26px;background:var(--color-neutral-300)"></div>
+        <div style="flex:1;height:26px;background:var(--color-neutral-300)"></div>
+        <div style="flex:1;height:26px;background:var(--color-neutral-300)"></div>
+        <div style="flex:1;height:26px;background:var(--color-neutral-300)"></div>
+        <div style="flex:1;height:26px;background:var(--color-neutral-300)"></div>
+      </div>
+      <p class="text-muted" style="font-size:12px;margin:0 0 6px">Four minutes paid · 6 sat accruing in the fifth</p>
+      <p class="text-muted" style="font-size:12px;margin:0 0 34px">Anything under 1 sat carries into the next interval.</p>
+
+      <div style="height:1px;background:var(--color-divider);margin-bottom:26px"></div>
+
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:20px">Boost · 00:14:07</div>
+      <div style="position:relative;margin-bottom:14px">
+        <div style="display:flex;align-items:flex-end;gap:0;height:44px">
+          <div style="flex:1;height:44px;border-left:2px solid var(--color-accent-2)"></div>
+          <div style="flex:1;height:22px;border-left:1px solid var(--color-neutral-400)"></div>
+          <div style="flex:1;height:22px;border-left:1px solid var(--color-neutral-400)"></div>
+          <div style="flex:1;height:34px;border-left:1px solid var(--color-neutral-500)"></div>
+          <div style="flex:1;height:22px;border-left:1px solid var(--color-neutral-400)"></div>
+          <div style="flex:1;height:22px;border-left:1px solid var(--color-neutral-400)"></div>
+          <div style="flex:1;height:34px;border-left:1px solid var(--color-neutral-500)"></div>
+          <div style="flex:1;height:22px;border-left:1px solid var(--color-neutral-400)"></div>
+          <div style="flex:1;height:22px;border-left:1px solid var(--color-neutral-400)"></div>
+          <div style="height:34px;border-left:1px solid var(--color-neutral-500)"></div>
+        </div>
+        <div style="height:2px;background:var(--color-text)"></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700);margin-top:5px">
+          <span style="color:var(--color-accent-2)">210</span><span>2 100</span><span>4 200</span><span>21 000</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:14px">
+        <div style="font-family:var(--font-heading);font-weight:600;font-size:30px;font-variant-numeric:tabular-nums">210</div>
+        <div class="text-muted" style="font-size:13px">sat · 202 left after sending</div>
+      </div>
+      <textarea class="input" style="min-height:60px;margin-bottom:12px" placeholder="Optional message, 280 characters"></textarea>
+      <button class="btn btn-block" type="button" style="background:var(--color-accent-2);color:var(--color-bg);margin:0">Send boost</button>
+      <p class="text-muted" style="font-size:12px;margin:10px 0 0">Sent as a kind:9321 nutzap to the podcast's relays.</p>
+    </div>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="1d"><div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Wallet route — balance, top-up, export with QR, history</div>
+<div class="dv-card" style="width:1280px">
+  <div style="height:3px;background:var(--color-text)"></div>
+  <div class="nav" style="padding:13px 44px">
+    <span class="nav-brand" style="font-size:19px">Cashu Player</span>
+    <div style="display:flex;gap:24px;margin-right:auto">
+      <a href="#1b">Listen</a><a href="#1d" aria-current="page">Wallet</a><a href="#1d">Settings</a>
+    </div>
+    <span style="font-size:13px;color:var(--color-neutral-700);font-variant-numeric:tabular-nums">npub1n0dev…u02cy</span>
+  </div>
+  <div style="height:1px;background:var(--color-divider)"></div>
+
+  <div style="padding:38px 44px 20px;display:flex;align-items:flex-end;gap:26px">
+    <div style="font-family:var(--font-heading);font-weight:600;font-size:96px;line-height:.9;font-variant-numeric:tabular-nums;letter-spacing:-.02em">412</div>
+    <div style="padding-bottom:12px">
+      <div style="font-family:var(--font-heading);font-weight:600;font-size:24px;margin-bottom:6px">sat</div>
+      <div style="display:flex;gap:8px"><span class="tag tag-accent">Storage: persistent</span><span class="tag tag-neutral">mint.minibits.cash</span></div>
+    </div>
+    <p style="margin:0 0 14px auto;max-width:330px;font-size:13px;color:var(--color-accent-2-700)">Clearing this site's data destroys the balance. Export a token before you close the browser.</p>
+  </div>
+
+  <div style="padding:24px 44px 40px;display:grid;grid-template-columns:1fr 1fr;gap:52px">
+    <div>
+      <h3 style="font-size:22px;margin:0 0 4px">Top up</h3>
+      <p class="text-muted" style="font-size:13px;margin:0 0 14px">Paste a Cashu token from an allowed mint, denominated in sat.</p>
+      <textarea class="input" style="min-height:96px;font-family:ui-monospace,Menlo,monospace;font-size:12px">cashuBo2FteBxodHRwczovL21pbnQuZXhhbXBsZS5jb21hdWNzYXRhdIGiYUlIAJ7cs0…</textarea>
+      <p style="font-size:13px;color:var(--color-accent-2-700);margin:10px 0 14px">Rejected: mint.example.com is not in the allowed list. The token stays here for another try.</p>
+      <button class="btn btn-primary" type="button">Top up</button>
+    </div>
+    <div>
+      <h3 style="font-size:22px;margin:0 0 4px">Export</h3>
+      <p class="text-muted" style="font-size:13px;margin:0 0 14px">412 sat at mint.minibits.cash · redeemable in any Cashu wallet.</p>
+      <div style="display:flex;gap:20px;align-items:flex-start">
+        <div class="qr" style="width:126px;height:126px;flex:none"><i style="top:0;left:0"></i><i style="top:0;right:0"></i><i style="bottom:0;left:0"></i></div>
+        <div style="flex:1;min-width:0">
+          <p style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;line-height:1.5;margin:0 0 12px;word-break:break-all;color:var(--color-neutral-800)">cashuBo2FteBxodHRwczovL21pbnQubWluaWJpdHMuY2FzaC9CaXRjb2luYXVjc2F0YXSBomFpSAB…</p>
+          <div style="display:flex;gap:8px"><button class="btn btn-secondary" type="button">Copy token</button><button class="btn btn-ghost" type="button">Regenerate</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:0 44px 44px">
+    <h3 style="font-size:22px;margin:0 0 16px">History</h3>
+    <table class="table">
+      <thead><tr><th style="width:96px">Amount</th><th style="width:170px">When</th><th>Podcast · Episode</th><th style="width:120px">Kind</th><th style="width:130px">Status</th></tr></thead>
+      <tbody>
+        <tr><td style="font-variant-numeric:tabular-nums">−10 sat</td><td style="font-variant-numeric:tabular-nums" class="text-muted">02.09.2026, 19:14</td><td>Nodesignal · Keine Angst</td><td class="text-muted">streaming</td><td><span class="tag tag-accent">sent</span></td></tr>
+        <tr><td style="font-variant-numeric:tabular-nums">−10 sat</td><td style="font-variant-numeric:tabular-nums" class="text-muted">02.09.2026, 19:13</td><td>Nodesignal · Keine Angst</td><td class="text-muted">streaming</td><td><span class="tag tag-accent">sent</span></td></tr>
+        <tr><td style="font-variant-numeric:tabular-nums">−100 sat</td><td style="font-variant-numeric:tabular-nums" class="text-muted">02.09.2026, 19:12</td><td>Nodesignal · Keine Angst</td><td class="text-muted">boost</td><td><span class="tag tag-neutral">pending</span></td></tr>
+        <tr><td style="font-variant-numeric:tabular-nums">−10 sat</td><td style="font-variant-numeric:tabular-nums" class="text-muted">02.09.2026, 19:12</td><td>Nodesignal · Keine Angst</td><td class="text-muted">streaming</td><td><span class="tag tag-accent-2">failed</span></td></tr>
+        <tr><td style="font-variant-numeric:tabular-nums">+512 sat</td><td style="font-variant-numeric:tabular-nums" class="text-muted">02.09.2026, 18:58</td><td class="text-muted">Token import</td><td class="text-muted">top-up</td><td><span class="tag tag-accent">sent</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="1e"><div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Boost dialog — the modal treatment, over the Listen route</div>
+<div class="dv-card" style="width:1280px;position:relative;height:720px">
+  <div style="filter:blur(1px)">
+    <div style="height:3px;background:var(--color-text)"></div>
+    <div class="nav" style="padding:13px 44px">
+      <span class="nav-brand" style="font-size:19px">Cashu Player</span>
+      <div style="display:flex;gap:24px;margin-right:auto"><a href="#1e" aria-current="page">Listen</a><a href="#1d">Wallet</a><a href="#1e">Settings</a></div>
+      <span style="font-size:13px;color:var(--color-neutral-700)">412 sat</span>
+    </div>
+    <div style="height:1px;background:var(--color-divider)"></div>
+    <div style="padding:34px 44px;display:flex;gap:32px;align-items:flex-start">
+      <div class="ph halftone" style="width:196px;height:196px;flex:none">Cover</div>
+      <div style="flex:1">
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent);margin-bottom:7px">Now playing · Nodesignal</div>
+        <h1 style="font-size:46px;margin:0 0 4px">Keine Angst</h1>
+        <p class="text-muted" style="font-size:14px;margin:0 0 22px">Episode 412 · 1:12:40 · streaming 10 sat/min</p>
+        <div style="height:4px;background:var(--color-neutral-300)"><div style="width:19.4%;height:100%;background:var(--color-accent)"></div></div>
+      </div>
+    </div>
+  </div>
+  <div style="position:absolute;inset:0;display:grid;place-items:center;background:color-mix(in srgb, var(--color-neutral-900) 50%, transparent)">
+    <div class="dialog" style="width:492px" role="dialog" aria-label="Send a boost">
+      <div>
+        <div class="dialog-title" style="margin-bottom:3px">Boost this episode</div>
+        <div class="text-muted" style="font-size:13px;font-variant-numeric:tabular-nums">Nodesignal · Keine Angst · 00:14:07</div>
+      </div>
+      <div>
+        <div class="field" style="margin-bottom:9px"><label>Amount</label></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" type="button" style="flex:1;background:var(--color-accent-2);color:var(--color-bg)">210</button>
+          <button class="btn btn-secondary" type="button" style="flex:1" disabled="true">2 100</button>
+          <button class="btn btn-secondary" type="button" style="flex:1" disabled="true">4 200</button>
+          <button class="btn btn-secondary" type="button" style="flex:1" disabled="true">21 000</button>
+        </div>
+        <p class="text-muted" style="font-size:12px;margin:9px 0 0">412 sat available — larger presets stay disabled until you top up.</p>
+      </div>
+      <div class="field">
+        <label for="boost-custom">Custom amount in sat</label>
+        <input class="input" id="boost-custom" type="number" value="210">
+      </div>
+      <div class="field">
+        <label for="boost-msg">Message</label>
+        <textarea class="input" id="boost-msg" style="min-height:74px">Strong episode</textarea>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:5px" class="text-muted">
+          <span>266 characters left</span><span>Sent as: “Strong episode 00:14:07”</span>
+        </div>
+      </div>
+      <div class="dialog-actions" style="margin-top:0">
+        <button class="btn btn-secondary" type="button">Cancel</button>
+        <button class="btn" type="button" style="background:var(--color-accent-2);color:var(--color-bg)">Send 210 sat</button>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+</div>
+<p class="dv-next">Try next: “take <a class="dv-oid" href="#1b">1b</a>'s ledger rail into <a class="dv-oid" href="#1a">1a</a>” · “make <a class="dv-oid" href="#1c">1c</a>'s gauge the boost everywhere” · “now the blocked and low-balance states”</p>
+</section>
+
+</x-dc>
+</body>
+</html>

@@ -17,6 +17,9 @@ export type SendOutcome = 'gesendet' | 'ausstehend';
 export interface StreamingState {
   /** In dieser Sitzung gesendete Sat (FR-30). */
   sentSats: number;
+  /** Anzahl der Nutzaps dieser Sitzung (FR-30). Ausstehende zaehlen mit —
+   *  ihre Proofs sind beim Mint bereits gelockt. */
+  sentZaps: number;
   /** Noch nicht gesendeter Rest in Sat, inklusive Bruchteilen (FR-25). */
   pendingSats: number;
   /** Insgesamt gehörte Sekunden dieser Sitzung. */
@@ -43,6 +46,7 @@ export class StreamingController {
   private totalListenedSeconds = 0;
   private secondsSinceFlush = 0;
   private sentSats = 0;
+  private sentZaps = 0;
   private stopped = false;
   private reason: string | undefined;
 
@@ -60,6 +64,7 @@ export class StreamingController {
   get state(): StreamingState {
     return {
       sentSats: this.sentSats,
+      sentZaps: this.sentZaps,
       pendingSats: this.pendingSats,
       totalListenedSeconds: this.totalListenedSeconds,
       stopped: this.stopped,
@@ -106,6 +111,7 @@ export class StreamingController {
       // 'ausstehend' heißt: die Proofs sind beim Mint schon gelockt. Der Betrag
       // darf nicht zurück in den Rest, sonst ginge er ein zweites Mal raus.
       this.sentSats += payable;
+      this.sentZaps += 1;
       this.reason = outcome === 'ausstehend' ? 'Noch kein Relay hat bestätigt.' : undefined;
     } catch (error) {
       // US-05-AC-5: nichts abgebucht, der Betrag bleibt als Rest stehen und

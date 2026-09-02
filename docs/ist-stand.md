@@ -48,11 +48,11 @@ angefasst. Alle Aussagen unten beziehen sich auf Quelltext und Testlauf.
 | FR-23 | umgesetzt | `src/payments/resolve-target.ts` → `MESSAGES`; `capability.ts` | `test/payments/resolve-target.test.ts`, `test/payments/capability.test.ts` | Vier unterscheidbare Gruende, `lookup-failed` getrennt von `no-nutzap-config` |
 | FR-24 | umgesetzt | `src/player/listening-ticker.ts` → `sample()` | `test/player/listening-ticker.test.ts` | Aus `currentTime`, nicht aus Timer-Ticks; Sprungerkennung ueber Wanduhr-Abgleich |
 | FR-25 | Code vorhanden, ungeprueft | `src/payments/streaming.ts` → `flush()` | `test/payments/streaming.test.ts` | Rest unter 1 Sat bleibt stehen. Der 60-s-Takt unter echter Wiedergabe ist ungeprueft |
-| FR-26 | umgesetzt | `src/payments/streaming-settings.ts`; UI `payments-panel.tsx` | `test/payments/streaming-settings.test.ts` | 0–1000, Vorgabe 10, einmalige Bestaetigung |
+| FR-26 | umgesetzt | `src/payments/streaming-settings.ts`; UI `src/ui/settings-view.tsx` und der Satz-Dialog in `src/main.tsx` | `test/payments/streaming-settings.test.ts` | 0–1000, Vorgabe 10, einmalige Bestaetigung |
 | FR-27 | Code vorhanden, ungeprueft | `src/payments/nutzap.ts` → `buildNutzap()`, `p2pkLockKey()` | `test/payments/nutzap.test.ts`, `test/payments/pay.test.ts` | Tags `proof`/`unit`/`u`/`p`, `02`-Praefix. Ob der Empfaenger die Proofs einloesen kann, sagt nur ein Test gegen eine echte Wallet |
 | FR-28 | umgesetzt | `src/ui/boost-dialog.tsx`; `nutzap.ts` → `formatTimecode()` | `test/ui/boost-dialog.test.tsx` | Vier Vorgaben, freier Betrag, 280 Zeichen mit Restzaehler |
 | FR-29 | Code vorhanden, ungeprueft | `src/payments/pay.ts` → `sendNutzap()`, `retryPendingNutzaps()` | `test/payments/pay.test.ts` (17 Tests) | Beide Faelle getrennt umgesetzt und getestet, siehe unten. Am Dokument nachgezogen |
-| FR-30 | umgesetzt | `src/ui/payments-panel.tsx` | `test/ui/payments-panel.test.tsx` | Sitzungszaehler, Boost-Bestaetigung, Fehlergrund |
+| FR-30 | umgesetzt | `src/ui/session-column.tsx` | `test/ui/session-column.test.tsx` | Sitzungszaehler, Anzahl der Nutzaps, offener Rest, Fehlergrund. Boost-Bestaetigung als Hinweiszeile in `src/main.tsx` |
 | FR-31 | umgesetzt | `public/manifest.webmanifest`; `src/sw.ts`; `src/pwa/register.ts` | `test/pwa/manifest.test.ts`, `test/pwa/cache-policy.test.ts`, `test/pwa/register.test.ts` | `sw.js` liegt nach dem Build in `dist/` (verifiziert). Registrierung nur unter `PROD` und `isSecureContext` |
 | FR-32 | Code vorhanden, ungeprueft | `src/pwa/install-prompt.ts`; `src/ui/install-button.tsx` | `test/ui/install-button.test.tsx` | `beforeinstallprompt` feuert nur unter HTTPS mit gueltigem Manifest — ohne Deployment nicht pruefbar |
 
@@ -78,7 +78,7 @@ angefasst. Alle Aussagen unten beziehen sich auf Quelltext und Testlauf.
 | NR-03 | Code vorhanden, ungeprueft | Guardrail-Regel `NR-03`: `FEED_PROXY_URL` nur in `src/feed/` | `test/guardrails/source.test.ts` | Statisch abgesichert; der Gegenbeweis waere ein Proxy-Aufruf zur Laufzeit |
 | NR-04 | Code vorhanden, ungeprueft | Guardrail-Regeln `NR-04`: `localStorage`, `console.*` | `test/guardrails/source.test.ts` | Faengt den Quelltext, nicht eine Bibliothek. DevTools-Pruefung bleibt |
 | NR-05 | umgesetzt | Guardrail-Regeln `NR-05` | `test/guardrails/source.test.ts` | 13 Testreferenzen, die dichteste Abdeckung im Projekt |
-| NR-06 | umgesetzt | `rateConfirmed`-Sperre `src/main.tsx:94`; `payments-panel.tsx` (`askForRate`) | `test/payments/streaming-settings.test.ts`, `test/ui/payments-panel.test.tsx` | Ohne Bestaetigung entsteht kein `StreamingController` |
+| NR-06 | umgesetzt | `rateConfirmed`-Sperre und `askForRate` in `src/main.tsx` | `test/payments/streaming-settings.test.ts` | Ohne Bestaetigung entsteht kein `StreamingController` |
 | NR-07 | umgesetzt | `local-wallet.ts:111` (Import); `resolve-target.ts` (Schnittmenge) | `test/wallet/import.test.ts`, `test/payments/resolve-target.test.ts` | Vergleich ueber `normalizeMintUrl`, nicht zeichengenau |
 | NR-08 | umgesetzt | kein Backend im Repo | `test/guardrails/source.test.ts` | Abhaengigkeitsliste ist auf fuenf Pakete festgenagelt; ein neues Paket laesst den Test rot werden |
 | NR-09 | Code vorhanden, ungeprueft | Guardrail-Regel `NR-09` in `tools/guardrails.ts` | `test/guardrails/scanner.test.ts`, `source.test.ts` | **In dieser Runde ergaenzt.** Faengt nur den schreibenden Teil ab; ob die NIP-60-Wallet des Testaccounts unveraendert bleibt, zeigt erst der Vorher-Nachher-Vergleich |
@@ -176,6 +176,40 @@ meldete, waehrend drei sichtbar waren, nennt sie jetzt die Gesamtzahl im Feed
 als Markup interpretiert oder bereinigt zu werden. Das ist jetzt unsichtbar,
 aber nicht behoben — wer die Beschreibung wieder einblendet, holt sich den
 Fehler zurueck.
+
+## Umsetzung des Design-Handoffs (02.09.2026)
+
+`design_handoff_cashu_player/` ist umgesetzt: Entwurf 1a (Hören), 1d (Wallet),
+1e (Boost-Dialog) und die vier Zustaende 3a bis 3d. 1b und 1c waren im Handoff
+ausdruecklich als nicht gewaehlt markiert und bleiben ungebaut.
+
+Neu entstanden: `src/ui/chrome.tsx` (Mastkopf, Navigation, Routen),
+`src/ui/session-column.tsx` (die vier Zustaende der rechten Spalte),
+`src/ui/settings-view.tsx`. `src/ui/payments-panel.tsx` ist aufgeloest — sein
+Inhalt verteilt sich auf die Session-Spalte, den Boost-Dialog und den
+Satz-Dialog. `src/ui/app.css` traegt jetzt die Broadsheet-Tokens aus dem
+Design-System des Handoffs.
+
+**Abweichungen vom Handoff, bewusst:**
+
+| Punkt | Handoff | Umgesetzt | Grund |
+|---|---|---|---|
+| Abspielgeschwindigkeit | vier Stufen (1× / 1,2× / 1,5× / 2×) | sieben Stufen (0,8× bis 2,1×) | Am 01.09.2026 ausdruecklich in dieser Staffelung bestellt. Die spaetere Ansage schlaegt den frueheren Entwurf; die Auswahl steht in `PLAYBACK_RATES`. |
+| Route „Einstellungen" | in jeder Navigationszeile, aber kein Screen entworfen | minimal gebaut | Die Route wegzulassen haette in jedem Screenshot eine Luecke hinterlassen. Sie traegt, was FR-26 (Satz), FR-18 (Speichermodus) und FR-32 (Installieren) verlangen und was in 1a und 1d keinen Platz hat. |
+| „import an OPML file" in 3d | Link im Entwurf | weggelassen | OPML-Import ist weder Anforderung noch implementiert. Ein Link ins Leere waere schlechter als keiner. |
+| Sprache | Mockups auf Englisch | Deutsch | So im Handoff verlangt: die englischen Texte sind „the meaning, not the wording". |
+| Mint in der Wallet-Zeile | `mint.minibits.cash` | der tatsaechlich konfigurierte Mint | Beispielwert im Entwurf, echter Wert zur Laufzeit. |
+| Cover und Show-Art | graue Platzhalter | echtes Artwork aus dem Feed, Platzhalter nur ohne Bild | Vom Handoff so vorgesehen: „real artwork comes from the feed's `<itunes:image>`". |
+
+**Geaendert, weil der Handoff es verlangt:** Die Boost-Vorgaben lauten jetzt
+210 / 2 100 / 4 200 / 21 000 statt 100 / 1 000 / 5 000 / 21 000. Der Handoff
+nennt die Vielfachen von 21 ausdruecklich gewollt. FR-28 ist nachgezogen.
+
+**Nicht geprueft:** Der Handoff ist auf 1280 px entworfen. Die Umsetzung
+enthaelt die dort beschriebene Stapelung unter 900 px, aber niemand hat sie an
+einem echten schmalen Fenster angesehen. Ebenso ungeprueft: Fokus-Falle und
+Fokus-Rueckgabe des Boost-Dialogs (Escape und Abbrechen schliessen, das ist
+umgesetzt und getestet — die Fokusfuehrung selbst nicht).
 
 ## Blockiert
 

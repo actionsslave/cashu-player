@@ -3,7 +3,13 @@ import tseslint from 'typescript-eslint';
 import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'coverage'] },
+  {
+    // design_handoff_cashu_player enthaelt Entwuerfe, keinen App-Code. Der
+    // Handoff sagt ausdruecklich: die HTML-Prototypen und support.js sind
+    // Referenz und gehen nicht in die App. Sie halten die Regeln der App
+    // deshalb auch nicht ein.
+    ignores: ['dist', 'node_modules', 'coverage', 'design_handoff_cashu_player'],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

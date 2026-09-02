@@ -1,6 +1,7 @@
 import { render } from 'preact';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BoostDialog } from '../../src/ui/boost-dialog.js';
+import { BOOST_PRESETS_SATS } from '../../src/config/build-config.js';
 import { clickButton, flush } from '../helpers/ui.js';
 
 let host: HTMLDivElement;
@@ -22,8 +23,14 @@ async function mount(props: Record<string, unknown> = {}) {
   await flush();
 }
 
+/** Der Sendeknopf traegt im Entwurf den Betrag: "210 Sat senden". */
 const sendButton = () =>
-  [...host.querySelectorAll('button')].find((b) => b.textContent?.trim() === 'Boost senden');
+  [...host.querySelectorAll('button')].find((b) => b.textContent?.trim().endsWith('Sat senden'));
+
+const clickSend = async () => {
+  sendButton()?.click();
+  await flush();
+};
 
 async function typeMessage(value: string): Promise<void> {
   const field = host.querySelector('textarea') as HTMLTextAreaElement;
@@ -52,35 +59,42 @@ afterEach(() => {
 });
 
 describe('FR-28: Boost mit Betrag und Nachricht', () => {
-  it('bietet die vier Vorgabebeträge an', async () => {
-    await mount();
-    const labels = [...host.querySelectorAll('button')].map((b) => b.textContent?.trim());
-    for (const preset of ['100', '1000', '5000', '21000']) {
-      expect(labels.some((label) => label?.startsWith(preset))).toBe(true);
-    }
+  it('bietet genau die konfigurierten Vorgabebetraege an', async () => {
+    await mount({ balance: 50_000 });
+    const labels = [...host.querySelectorAll('.boost-presets button')].map((b) =>
+      b.textContent?.trim(),
+    );
+    expect(labels).toEqual(BOOST_PRESETS_SATS.map((p) => p.toLocaleString('de-DE')));
+  });
+
+  it('US-06-AC-2: sperrt Vorgaben oberhalb des Guthabens', async () => {
+    await mount({ balance: 300 });
+    const buttons = [...host.querySelectorAll('.boost-presets button')] as HTMLButtonElement[];
+    // 210 ist bezahlbar, 2 100 / 4 200 / 21 000 nicht.
+    expect(buttons.map((b) => b.disabled)).toEqual([false, true, true, true]);
   });
 
   it('US-06-AC-1: sendet den gewählten Betrag mit Nachricht und Zeitmarke', async () => {
     await mount();
-    await clickButton(host, '1000');
+    await clickButton(host, '2.100');
     await typeMessage('Starke Folge');
-    await clickButton(host, 'Boost senden');
+    await clickSend();
 
-    expect(onSend).toHaveBeenCalledWith(1000, 'Starke Folge 00:14:07');
+    expect(onSend).toHaveBeenCalledWith(2100, 'Starke Folge 00:14:07');
   });
 
   it('hängt die Zeitmarke auch ohne Nachricht an', async () => {
     await mount();
-    await clickButton(host, '100');
-    await clickButton(host, 'Boost senden');
+    await clickButton(host, '210');
+    await clickSend();
 
-    expect(onSend).toHaveBeenCalledWith(100, '00:14:07');
+    expect(onSend).toHaveBeenCalledWith(210, '00:14:07');
   });
 
   it('nimmt einen frei eingegebenen Betrag an', async () => {
     await mount();
     await typeAmount('333');
-    await clickButton(host, 'Boost senden');
+    await clickSend();
 
     expect(onSend).toHaveBeenCalledWith(333, '00:14:07');
   });
@@ -129,7 +143,7 @@ describe('US-06-AC-2: zu wenig Guthaben', () => {
 describe('US-06-AC-3: Abbrechen', () => {
   it('sendet nichts', async () => {
     await mount();
-    await clickButton(host, '1000');
+    await clickButton(host, '210');
     await clickButton(host, 'Abbrechen');
 
     expect(onSend).not.toHaveBeenCalled();

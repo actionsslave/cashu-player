@@ -84,19 +84,25 @@ describe('FR-12: Wiedergabe und Navigation', () => {
     expect(audioEl().currentTime).toBe(0);
   });
 
-  it('setzt die Position über die Fortschrittsleiste', async () => {
+  it('setzt die Position über einen Klick auf die Fortschrittsleiste', async () => {
     await mount();
-    const slider = host.querySelector('input[type="range"]') as HTMLInputElement;
-    slider.value = '600';
-    slider.dispatchEvent(new Event('input', { bubbles: true }));
+    const track = host.querySelector('.progress-track') as HTMLElement;
+    // jsdom misst nichts; die Leiste bekommt fuer den Test eine Breite.
+    track.getBoundingClientRect = () => ({ left: 0, width: 1000 }) as DOMRect;
+
+    track.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: 500 }));
     await flush();
-    expect(audioEl().currentTime).toBe(600);
+
+    // Halbe Breite bei 3723 s Dauer.
+    expect(audioEl().currentTime).toBeCloseTo(3723 / 2, 5);
   });
 
-  it('nimmt die Episodendauer als Länge der Fortschrittsleiste', async () => {
+  it('meldet Dauer und Position ueber die Slider-Rolle', async () => {
     await mount();
-    const slider = host.querySelector('input[type="range"]') as HTMLInputElement;
-    expect(slider.max).toBe('3723');
+    const track = host.querySelector('.progress-track') as HTMLElement;
+    expect(track.getAttribute('role')).toBe('slider');
+    expect(track.getAttribute('aria-valuemax')).toBe('3723');
+    expect(track.getAttribute('aria-valuenow')).toBe('0');
   });
 });
 
@@ -184,12 +190,12 @@ describe('FR-12: Abspielgeschwindigkeit', () => {
     expect(audioEl().playbackRate).toBe(2.1);
   });
 
-  it('beschriftet die Stufen mit Komma und x', async () => {
+  it('beschriftet die Stufen mit Komma und Malzeichen', async () => {
     await mount();
 
     const beschriftungen = [...rateEl().options].map((option) => option.textContent);
-    expect(beschriftungen).toContain('0,8x');
-    expect(beschriftungen).toContain('1x');
-    expect(beschriftungen).toContain('2,1x');
+    expect(beschriftungen).toContain('0,8×');
+    expect(beschriftungen).toContain('1×');
+    expect(beschriftungen).toContain('2,1×');
   });
 });

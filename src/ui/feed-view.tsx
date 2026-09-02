@@ -1,5 +1,6 @@
 /**
- * Abos und Episoden (FR-07 bis FR-11, FR-21).
+ * Subscriptions-Block aus Entwurf 1a und die leere Bibliothek aus 3d
+ * (FR-07 bis FR-11, FR-21).
  */
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import { EPISODES_VISIBLE } from '../config/build-config.js';
@@ -20,16 +21,9 @@ export interface FeedViewProps {
   fetchImpl?: typeof fetch;
   /** Nur für Tests; im Betrieb FEED_PROXY_URL aus der Build-Konfiguration. */
   proxyUrl?: string;
+  /** Episode, die gerade läuft — im Entwurf fett und in Textfarbe. */
+  playingEpisodeId?: string;
   onEpisodeSelected?: (episode: EpisodeRecord, subscription: SubscriptionSummary) => void;
-}
-
-export function formatDuration(seconds: number | undefined): string {
-  if (!seconds) return '';
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const rest = seconds % 60;
-  const pad = (value: number) => String(value).padStart(2, '0');
-  return hours > 0 ? `${hours}:${pad(minutes)}:${pad(rest)}` : `${minutes}:${pad(rest)}`;
 }
 
 function describeError(error: unknown): string {
@@ -38,27 +32,35 @@ function describeError(error: unknown): string {
   return 'Der Feed konnte nicht geladen werden.';
 }
 
-export function FeedView({ fetchImpl, proxyUrl, onEpisodeSelected }: FeedViewProps) {
+export function FeedView({
+  fetchImpl,
+  proxyUrl,
+  playingEpisodeId,
+  onEpisodeSelected,
+}: FeedViewProps) {
   const [url, setUrl] = useState('');
   const [subscriptions, setSubscriptions] = useState<SubscriptionSummary[]>([]);
-  const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
-  const [episodes, setEpisodes] = useState<EpisodeRecord[]>([]);
+  const [episodes, setEpisodes] = useState<Record<string, EpisodeRecord[]>>({});
   const [error, setError] = useState<string | undefined>(undefined);
   const [confirmingId, setConfirmingId] = useState<string | undefined>(undefined);
 
-  const reload = useCallback(
-    async (select?: string) => {
-      const list = await listSubscriptions();
-      setSubscriptions(list);
-      const active = select ?? selectedId ?? list[0]?.id;
-      setSelectedId(active);
-      setEpisodes(active ? await listEpisodes(active) : []);
-    },
-    [selectedId],
-  );
+  const reload = useCallback(async () => {
+    // Der Entwurf zeigt alle Abos nebeneinander, jedes mit seinen neuesten
+    // Folgen. Die Episodenlisten laufen parallel: eine Schleife mit await je
+    // Feed haengt die Zahl der Renderrunden an die Zahl der Abos.
+    const list = await listSubscriptions();
+    const listen = await Promise.all(list.map((entry) => listEpisodes(entry.id)));
 
-  // Einmal beim Mounten laden; spätere Aktualisierungen laufen über die Handler,
-  // damit die Auswahl des Nutzers nicht bei jedem Renderlauf zurückspringt.
+    const byFeed: Record<string, EpisodeRecord[]> = {};
+    list.forEach((entry, index) => {
+      byFeed[entry.id] = listen[index];
+    });
+
+    // Beides in einem Zug, damit nie eine Abo-Liste ohne ihre Episoden steht.
+    setSubscriptions(list);
+    setEpisodes(byFeed);
+  }, []);
+
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     if (loaded) return;
@@ -69,10 +71,10 @@ export function FeedView({ fetchImpl, proxyUrl, onEpisodeSelected }: FeedViewPro
   async function handleSubscribe() {
     setError(undefined);
     try {
-      // US-02-AC-4: liegt das Abo schon vor, springt die Ansicht dorthin.
-      const subscription = await subscribe(url, { fetchImpl, proxyUrl });
+      // US-02-AC-4: liegt das Abo schon vor, legt subscribe kein zweites an.
+      await subscribe(url, { fetchImpl, proxyUrl });
       setUrl('');
-      await reload(subscription.id);
+      await reload();
     } catch (cause) {
       setError(describeError(cause));
     }
@@ -82,7 +84,7 @@ export function FeedView({ fetchImpl, proxyUrl, onEpisodeSelected }: FeedViewPro
     setError(undefined);
     try {
       await refreshSubscription(id, { fetchImpl, proxyUrl });
-      await reload(id);
+      await reload();
     } catch (cause) {
       // FR-11: der letzte Stand bleibt stehen, nur der Hinweis kommt dazu.
       setError(describeError(cause));
@@ -92,105 +94,145 @@ export function FeedView({ fetchImpl, proxyUrl, onEpisodeSelected }: FeedViewPro
   async function handleUnsubscribe(id: string) {
     await unsubscribe(id);
     setConfirmingId(undefined);
-    const list = await listSubscriptions();
-    setSubscriptions(list);
-    const next = list[0]?.id;
-    setSelectedId(next);
-    setEpisodes(next ? await listEpisodes(next) : []);
+    await reload();
   }
 
-  const selected = subscriptions.find((subscription) => subscription.id === selectedId);
+  const addFeed = (
+    <div class="add-feed">
+      <input
+        class="input"
+        type="url"
+        name="feed-url"
+        placeholder="https://…/rss"
+        value={url}
+        onInput={(event) => setUrl((event.target as HTMLInputElement).value)}
+      />
+      <button
+        type="button"
+        class="btn btn-primary"
+        onClick={() => void handleSubscribe()}
+        disabled={url.trim() === ''}
+      >
+        Abonnieren
+      </button>
+    </div>
+  );
+
+  // 3d — leere Bibliothek. Kein Transport, keine Session-Spalte, keine Illustration.
+  if (subscriptions.length === 0) {
+    return (
+      <section class="empty-library">
+        <span class="kicker">Nichts in der Wiedergabe</span>
+        <h1>Füg einen Feed ein, um zu hören.</h1>
+        <p class="lead text-muted">
+          Jede RSS-Adresse funktioniert. Podcasts mit hinterlegter nostr-Identität werden pro
+          Minute aus deiner Wallet bezahlt; die übrigen laufen einfach.
+        </p>
+        {addFeed}
+        {error && <p class="wallet-error">{error}</p>}
+      </section>
+    );
+  }
 
   return (
-    <section class="feeds">
+    <section class="subscriptions">
       <h2>Abos</h2>
-      <div class="add-feed">
-        <input
-          type="url"
-          name="feed-url"
-          placeholder="https://…/rss"
-          value={url}
-          onInput={(event) => setUrl((event.target as HTMLInputElement).value)}
-        />
-        <button type="button" onClick={() => void handleSubscribe()} disabled={url.trim() === ''}>
-          Abonnieren
-        </button>
-      </div>
-      {error && <p class="error">{error}</p>}
+      <p class="subline text-muted">
+        Je die drei neuesten Folgen. Nur Titel — Feed-Beschreibungen sind rohes HTML.
+      </p>
+      {addFeed}
+      {error && <p class="wallet-error">{error}</p>}
 
-      <ul class="subscriptions">
+      <div class="feed-grid">
         {subscriptions.map((subscription) => (
-          <li
-            class={`subscription${subscription.id === selectedId ? ' selected' : ''}`}
-            key={subscription.id}
-          >
-            {subscription.imageUrl && (
-              <img class="cover" src={subscription.imageUrl} alt="" width={48} height={48} />
-            )}
-            <button type="button" class="link" onClick={() => void reload(subscription.id)}>
-              {subscription.title}
-            </button>
-            {/*
-              FR-09: die Gesamtzahl des Feeds, nicht der lokale Bestand — sie
-              beantwortet die Frage "wie gross ist dieser Podcast". Aeltere Abos
-              tragen den Wert nicht; dann bleibt der gespeicherte Bestand.
-            */}
-            <span class="meta">{subscription.totalEpisodes ?? subscription.episodeCount} Episoden</span>
-            {subscription.loadedViaProxy && <span class="badge">über Proxy geladen</span>}
-            <button type="button" onClick={() => void handleRefresh(subscription.id)}>
-              Aktualisieren
-            </button>
-            <button type="button" onClick={() => setConfirmingId(subscription.id)}>
-              Abbestellen
-            </button>
-            {confirmingId === subscription.id && (
-              <div class="dialog" role="dialog" aria-label="Abbestellen bestätigen">
-                <p>„{subscription.title}" abbestellen? Die Episodendaten werden mitgelöscht.</p>
-                <button type="button" onClick={() => void handleUnsubscribe(subscription.id)}>
-                  Ja, abbestellen
-                </button>
-                <button type="button" onClick={() => setConfirmingId(undefined)}>
-                  Abbrechen
-                </button>
+          <div class="subscription" key={subscription.id}>
+            <div class="feed-head">
+              {subscription.imageUrl ? (
+                <img
+                  class="art halftone"
+                  src={subscription.imageUrl}
+                  alt=""
+                  width={52}
+                  height={52}
+                />
+              ) : (
+                <span class="art art-placeholder">Art</span>
+              )}
+              <div>
+                <h4>{subscription.title}</h4>
+                <p class="count text-muted">
+                  <span>{subscription.totalEpisodes ?? subscription.episodeCount} Episoden</span>
+                  {subscription.loadedViaProxy && (
+                    <span class="tag tag-neutral">über Proxy geladen</span>
+                  )}
+                </p>
               </div>
-            )}
-          </li>
-        ))}
-      </ul>
+            </div>
 
-      {selected && (
-        <>
-          <h3>{selected.title}</h3>
-          {/* US-07-AC-1: der konkret fehlende Baustein, hier die nostr-Identität. */}
-          {!selected.npub && (
-            <p class="locked">
-              Zahlungen sind für diesen Podcast nicht möglich: Der Feed enthält keine
-              nostr-Identität.
-            </p>
-          )}
-          {/*
-            FR-10: die neuesten EPISODES_VISIBLE Episoden, je Episode bewusst
-            nur der Titel. Datum, Dauer und Beschreibung stehen
-            weiterhin am EpisodeRecord und werden beim Parsen gespeichert — sie
-            sind hier nur nicht sichtbar, weil die Beschreibungen der Feeds die
-            Liste unlesbar machen. Der Titel waehlt die Episode aus; die
-            Wiedergabe uebernimmt der Player.
-          */}
-          <ul class="episodes">
-            {episodes.slice(0, EPISODES_VISIBLE).map((episode) => (
-              <li key={episode.id}>
+            {/* US-07-AC-1: der konkret fehlende Baustein, hier die nostr-Identität. */}
+            {!subscription.npub && (
+              <p class="feed-blocked">
+                Keine Zahlungen: Dieser Feed trägt keine nostr-Identität. Die Wiedergabe läuft.
+              </p>
+            )}
+
+            <div class="episodes">
+              {(episodes[subscription.id] ?? []).slice(0, EPISODES_VISIBLE).map((episode) => (
                 <button
                   type="button"
-                  class="link"
-                  onClick={() => onEpisodeSelected?.(episode, selected)}
+                  key={episode.id}
+                  class={episode.id === playingEpisodeId ? 'ep playing' : 'ep'}
+                  onClick={() => onEpisodeSelected?.(episode, subscription)}
                 >
                   {episode.title}
                 </button>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+              ))}
+            </div>
+
+            <div class="feed-actions">
+              <button
+                type="button"
+                class="btn btn-ghost"
+                onClick={() => void handleRefresh(subscription.id)}
+              >
+                Aktualisieren
+              </button>
+              <button
+                type="button"
+                class="btn btn-ghost"
+                onClick={() => setConfirmingId(subscription.id)}
+              >
+                Abbestellen
+              </button>
+            </div>
+
+            {confirmingId === subscription.id && (
+              <div class="dialog-backdrop">
+                <div class="dialog" role="dialog" aria-label="Abbestellen bestätigen">
+                  <p class="dialog-title">„{subscription.title}" abbestellen?</p>
+                  <p>Die Episodendaten werden mitgelöscht.</p>
+                  <div class="dialog-actions">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      onClick={() => setConfirmingId(undefined)}
+                    >
+                      Abbrechen
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      onClick={() => void handleUnsubscribe(subscription.id)}
+                    >
+                      Ja, abbestellen
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

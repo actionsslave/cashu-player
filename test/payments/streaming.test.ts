@@ -186,3 +186,44 @@ describe('FR-30: Rückmeldung', () => {
     expect(instance.state.reason).toMatch(/Kein Relay erreichbar/);
   });
 });
+
+describe('FR-30: Anzahl der Nutzaps dieser Sitzung', () => {
+  it('zaehlt jeden bestaetigten Versand', async () => {
+    const controller = new StreamingController({
+      rate: 60,
+      send: async () => 'gesendet',
+      balance: async () => 1000,
+    });
+
+    await controller.handleTick(tick(60));
+    await controller.handleTick(tick(60));
+
+    expect(controller.state).toMatchObject({ sentSats: 120, sentZaps: 2 });
+  });
+
+  it('zaehlt einen ausstehenden Versand mit — die Proofs sind weg', async () => {
+    const controller = new StreamingController({
+      rate: 60,
+      send: async () => 'ausstehend',
+      balance: async () => 1000,
+    });
+
+    await controller.handleTick(tick(60));
+
+    expect(controller.state).toMatchObject({ sentSats: 60, sentZaps: 1 });
+  });
+
+  it('zaehlt einen gescheiterten Versuch nicht mit', async () => {
+    const controller = new StreamingController({
+      rate: 60,
+      send: async () => {
+        throw new Error('kein Relay');
+      },
+      balance: async () => 1000,
+    });
+
+    await controller.handleTick(tick(60));
+
+    expect(controller.state).toMatchObject({ sentSats: 0, sentZaps: 0 });
+  });
+});
