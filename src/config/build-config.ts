@@ -10,23 +10,34 @@ export const PLACEHOLDER_MARKER = 'PLATZHALTER';
 /**
  * Erlaubte Mints (FR-15, NR-07).
  *
- * Aktuell nur der oeffentliche Testmint: Seine Tokens sind wertlos, also kann
- * in der Entwicklung niemand echte Betraege verlieren. Geprueft am 01.09.2026
- * ueber /v1/info und /v1/keysets: NUT-11 ja, NUT-12 ja,
- * Access-Control-Allow-Origin `*`, aktives sat-Keyset mit input_fee_ppk 100.
+ * Beide sind oeffentliche Testmints: ihre Tokens sind wertlos, also kann in
+ * der Entwicklung niemand echte Betraege verlieren. Geprueft am 02.09.2026
+ * ueber /v1/info und /v1/keysets, beide mit Access-Control-Allow-Origin `*`:
  *
- * Zwei offene Punkte vor der Demo:
- *   - A-05 verlangt einen Reserve-Mint. Hier steht einer. Kandidaten mit
- *     Belegen stehen in docs/kandidaten.md; Minibits ist der einzige
- *     geprueft gebuehrenfreie mit vollstaendigem CORS.
- *   - 100 ppk sind nicht fee-frei. Bei 10 Sat pro Minute faellt das kaum ins
- *     Gewicht, widerspricht aber A-05.
+ *   testnut.cashu.exchange  Nutshell-CF 0.0.1  NUT-11 ja, NUT-12 NEIN,
+ *                           aktives sat-Keyset 10 ppk
+ *   testnut.cashu.space     cdk-mintd 0.17.0   NUT-11 ja, NUT-12 ja,
+ *                           aktives sat-Keyset 100 ppk
+ *
+ * A-05 verlangt zwei Mints mit NUT-11 und NUT-12. Der Reserve-Mint erfuellt
+ * das nur halb: testnut.cashu.exchange meldet `NUT-12: supported false`. Ohne
+ * DLEQ kann der Empfaenger nicht pruefen, ob der Mint seine Token markiert
+ * hat — NIP-61 empfiehlt es deshalb ausdruecklich. Am 02.09.2026 bewusst in
+ * Kauf genommen, weil cashu.space beim Minten nicht zuverlaessig war.
+ * Vor der Demo neu entscheiden: docs/kandidaten.md nennt Alternativen mit
+ * vollstaendigem NUT-12.
+ *
+ * Beide fuehren neben sat weitere Einheiten. Ein versehentlich in usd
+ * gemintetes Token faengt die Einheitenpruefung in importToken() ab.
  *
  * CORS ist eine Eigenschaft des Paares aus Origin und Mint: Die Pruefung oben
  * lief von der Kommandozeile, nicht aus dem Browser unter der Demo-Origin.
  * A-02 ueber /pruefung/a02-mints.html bleibt Pflicht.
  */
-export const ALLOWED_MINTS: readonly string[] = ['https://testnut.cashu.space'];
+export const ALLOWED_MINTS: readonly string[] = [
+  'https://testnut.cashu.exchange',
+  'https://testnut.cashu.space',
+];
 
 /**
  * Relays für das Nachschlagen von kind:10019 (FR-22).

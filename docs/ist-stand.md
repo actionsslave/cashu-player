@@ -37,7 +37,7 @@ angefasst. Alle Aussagen unten beziehen sich auf Quelltext und Testlauf.
 | FR-12 | umgesetzt | `src/ui/player.tsx` → `start`, `halt`, `skip`, `scrubTo`, `select[name=playback-rate]` | `test/ui/player.test.tsx` | +30 s / −15 s, Fortschrittsleiste, sieben Geschwindigkeitsstufen aus `PLAYBACK_RATES` (ergaenzt 01.09.2026). Der `ListeningTicker` rechnet `playbackRate` bereits in seine Sprungerkennung ein, geprueft in `test/player/listening-ticker.test.ts` |
 | FR-13 | Code vorhanden, ungeprueft | `src/player/media-session.ts` | `test/player/media-session.test.ts` | Ob das Betriebssystem Titel und Cover wirklich anzeigt und die Medientaste durchkommt, sagt kein jsdom-Test |
 | FR-14 | umgesetzt | `src/player/position-store.ts` → `PositionPersister`, `loadPosition()` | `test/player/position-store.test.ts` | `POSITION_PERSIST_INTERVAL_MS` = 10 s |
-| FR-15 | Code vorhanden, ungeprueft | `src/wallet/local-wallet.ts` → `LocalWallet.balance()` | `test/wallet/local-wallet.test.ts` | Gegen einen echten Mint ungetestet. `ALLOWED_MINTS` steht seit 01.09.2026 auf `testnut.cashu.space` — **ein** Mint, A-05 verlangt zwei |
+| FR-15 | Code vorhanden, ungeprueft | `src/wallet/local-wallet.ts` → `LocalWallet.balance()` | `test/wallet/local-wallet.test.ts` | Gegen einen echten Mint ungetestet. `ALLOWED_MINTS` fuehrt seit 02.09.2026 zwei Testmints; einer davon ohne NUT-12 |
 | FR-16 | Code vorhanden, ungeprueft | `local-wallet.ts` → `exportTokens()`; `src/ui/qr-code.tsx` | `test/wallet/export.test.ts`, `test/ui/qr-code.test.tsx` | Der eigentliche Test ist die **Einloesung in einer fremden Wallet** — das kann nur ein Mensch |
 | FR-17 | Code vorhanden, ungeprueft | `local-wallet.ts` → `importToken()`; `TokenImportError` | `test/wallet/import.test.ts` | Fuenf benannte Fehlergruende inkl. „bereits eingeloest" (NUT-07) und „einheit-nicht-unterstuetzt" (ergaenzt 01.09.2026). Die Einheit steht als `WALLET_UNIT` an einer Stelle und wird in Import, Export, Nutzap-Tag und Mint-Gateway verwendet |
 | FR-18 | Code vorhanden, ungeprueft | `src/wallet/persistence.ts` → `ensurePersistentStorage()` | `test/wallet/persistence.test.ts` | Chrome entscheidet heuristisch; beide Ergebnisse gueltig |
@@ -150,7 +150,7 @@ Am 01.09.2026 gesetzt, nachdem die Entscheidungen gefallen sind:
 
 | Konstante | Wert | Bemerkung |
 |---|---|---|
-| `ALLOWED_MINTS` | `https://testnut.cashu.space` | Testmint, Tokens wertlos. Am 01.09.2026 geprueft: NUT-11 ja, NUT-12 ja, CORS `*`, aktives sat-Keyset 100 ppk. **A-05 offen** — der Reserve-Mint fehlt, und 100 ppk sind nicht fee-frei |
+| `ALLOWED_MINTS` | `https://testnut.cashu.exchange`, `https://testnut.cashu.space` | Zwei Testmints, Tokens wertlos. Am 02.09.2026 geprueft, beide CORS `*`. **A-05 der Zahl nach erfuellt, dem Inhalt nach nicht**: `cashu.exchange` meldet `NUT-12: supported false`. Am 02.09.2026 bewusst in Kauf genommen, weil `cashu.space` beim Minten nicht zuverlaessig war. Fees 10 bzw. 100 ppk, also nicht fee-frei. Vergleich in `kandidaten.md` |
 | `DEMO_RELAYS` | `relay.damus.io`, `relay.primal.net`, `nos.lol` | Nur fuer das Nachschlagen von kind:10019. Nutzaps gehen an die Relays aus dem kind:10019 des Empfaengers (FR-27, NR-02). Alle drei am 01.09.2026 per NIP-11 erreichbar, ohne AUTH, ohne Zahlung |
 | `FEED_PROXY_URL` | leer | OQ-03, Rueckfall „Feeds waehlen, die CORS bereits setzen". `fetchFeed()` ueberspringt den Zweitversuch bei leerem Wert |
 | `DEMO_NPUB` | entfernt | War nirgends verwendet, siehe Abweichung 3 |

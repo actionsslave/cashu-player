@@ -54,9 +54,10 @@ liefert `false`, die Warnung im UI ist weg.
 
 **Fuer die Demo reicht das nicht.** Zwei Punkte stehen offen:
 
-- **A-05 ist unerfuellt.** Es steht ein Mint in der Liste, verlangt sind zwei.
-  Faellt der Testmint aus, ist die Demo tot. Kandidaten mit Belegen stehen in
-  [`kandidaten.md`](kandidaten.md).
+- **A-05 ist nur halb erfuellt.** Seit 02.09.2026 stehen zwei Mints in der
+  Liste, die Zahl stimmt also. Aber `testnut.cashu.exchange` kann kein NUT-12
+  (DLEQ), das A-05 und NIP-61 verlangen. Kandidaten mit vollstaendigem NUT-12
+  stehen in [`kandidaten.md`](kandidaten.md).
 - **Der Testmint ist ein Testmint.** Seine Tokens sind wertlos — richtig fuer
   die Entwicklung, falsch fuer eine Buehne, auf der echtes Ecash fliessen soll.
   Und mit 100 ppk ist er nicht fee-frei, was A-05 ebenfalls fordert.

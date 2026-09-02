@@ -37,10 +37,18 @@ describe('Build-Konstanten', () => {
     expect(hasPlaceholders()).toBe(false);
   });
 
-  it('A-05: der Reserve-Mint fehlt noch — bewusst, mit Testmint im Betrieb', () => {
-    // Diese Erwartung ist eine Erinnerung, kein Qualitaetsmerkmal. Kommt der
-    // zweite Mint dazu, wird sie rot und gehoert dann auf toBeGreaterThan(1)
-    // gehoben. Siehe docs/kandidaten.md.
-    expect(ALLOWED_MINTS).toEqual(['https://testnut.cashu.space']);
+  it('A-05: zwei Mints, damit einer ausfallen darf', () => {
+    expect(ALLOWED_MINTS).toHaveLength(2);
+  });
+
+  it('fuehrt genau die beiden entschiedenen Testmints', () => {
+    // Erinnerung, kein Qualitaetsmerkmal: Wird die Liste geaendert, wird diese
+    // Zeile rot und die Begruendung gehoert nach docs/kandidaten.md.
+    // testnut.cashu.exchange kann kein NUT-12 (DLEQ) — bewusst in Kauf
+    // genommen, siehe dort.
+    expect([...ALLOWED_MINTS]).toEqual([
+      'https://testnut.cashu.exchange',
+      'https://testnut.cashu.space',
+    ]);
   });
 });

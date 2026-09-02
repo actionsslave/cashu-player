@@ -1,10 +1,29 @@
 # Kandidaten für die Build-Konstanten
 
-> **Status: Vorschlagsliste. Eine Zwischenentscheidung ist gefallen.**
-> Am 01.09.2026 steht `ALLOWED_MINTS` auf `https://testnut.cashu.space` —
-> bewusst der Testmint, damit in der Entwicklung niemand echte Betraege
-> riskiert. Fuer die Demo bleibt die Auswahl unten offen: **A-05 verlangt zwei
-> Mints**, und der Testmint gehoert nicht auf die Buehne.
+> **Status: Vorschlagsliste. Zwei Zwischenentscheidungen sind gefallen.**
+> `ALLOWED_MINTS` fuehrt seit 02.09.2026 zwei Testmints:
+> `https://testnut.cashu.exchange` und `https://testnut.cashu.space` — beide
+> mit wertlosen Tokens, damit in der Entwicklung niemand echte Betraege
+> riskiert. **Fuer die Demo taugt das nicht**: Testmints gehoeren nicht auf die
+> Buehne, und `cashu.exchange` kann kein NUT-12. Die Auswahl unten bleibt offen.
+
+## Nachtrag 02.09.2026 — die beiden Testmints im Vergleich
+
+| | `testnut.cashu.exchange` | `testnut.cashu.space` |
+|---|---|---|
+| Software | Nutshell-CF 0.0.1 | cdk-mintd 0.17.0-rc.3 |
+| NUT-11 (P2PK) | ja | ja |
+| **NUT-12 (DLEQ)** | **nein** (`supported: false`) | ja |
+| Fee, aktives sat-Keyset | 10 ppk | 100 ppk |
+| Weitere aktive Einheiten | usd (0 ppk) | usd, eur, msat (je 100 ppk) |
+| CORS auf GET | `*` | `*` |
+| Antwortzeit `/v1/keysets` | ~2,2 s | ~0,07 s |
+
+`cashu.exchange` kam am 02.09.2026 dazu, weil `cashu.space` beim Minten nicht
+zuverlaessig arbeitete. Der Preis ist NUT-12: Ohne DLEQ kann der Empfaenger
+nicht pruefen, ob der Mint seine Token markiert hat, und NIP-61 empfiehlt es
+ausdruecklich. **A-05 ist damit der Zahl nach erfuellt, dem Inhalt nach
+nicht.** Fuer die Demo ist das neu zu entscheiden.
 
 Erhebungsdatum: 2026-09-01. Gegengeprüft am selben Tag. Alle Werte stammen aus **lesenden** HTTP-GETs,
 die live gegen die Endpunkte gelaufen sind. Keine Quotes, keine Swaps,
